@@ -1,0 +1,96 @@
+* {
+	box-sizing: border-box;
+}
+
+:root {
+	font-weight: 400;
+	color-scheme: light dark;
+	font-synthesis: none;
+	text-rendering: geometricPrecision;
+	font-family: "Geist", sans-serif;
+	font-optical-sizing: auto;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	background-color: white;
+	height: 100dvh;
+	width: 100dvw;
+}
+
+.sign-in,
+.sign-up {
+	background-color: rgba(236, 236, 236, 0.212);
+}
+
+.sign-up > div,
+.sign-in > div {
+	box-shadow: 0px 0px 18px 12px rgba(0, 0, 0, 0.01);
+}
+
+input[type="checkbox"] {
+	appearance: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #ffffff00;
+	margin: 0;
+	font: inherit;
+	color: currentColor;
+	width: 1em;
+	height: 1em;
+	border: 1px solid currentColor;
+	border-radius: 0.15em;
+	transform: translateY(-0.075em);
+}
+
+input[type="checkbox"]::before {
+	display: block;
+	content: "";
+	width: 0.65em;
+	height: 0.65em;
+	transition: 220ms transform ease-in-out, 200ms background-color ease-in-out;
+	transform: scale(0);
+	box-shadow: inset 1em 1em var(--form-control-color);
+	transform-origin: bottom left;
+	clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+	transform-origin: bottom left;
+	background-color: var(--color-purple-500);
+}
+
+input[type="checkbox"]:checked::before {
+	transform: scale(1);
+	background-color: var(--color-purple-500);
+}
+
+.sign-in input:focus,
+.sign-up input:focus {
+	outline: none;
+	border: 1px solid var(--color-indigo-400);
+}
+
+.sign-in p.error,
+.sign-up p.error {
+	line-height: 0.8em;
+	font-size: 11px;
+	color: rgba(240, 129, 129, 0.904);
+	margin: 9px 3px;
+	margin-bottom: 0px;
+	font-weight: 500;
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+	.sign-up,
+	.sign-in {
+		margin-block: 8rem;
+	}
+}
+
+@media (orientation: landscape) and (max-height: 450px) {
+	.sign-up,
+	.sign-in {
+		margin-block: 12rem;
+	}
+}
