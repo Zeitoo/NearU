@@ -1,10 +1,12 @@
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { NavLink } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
+import { MuiTelInput } from "mui-tel-input";
 
 type SignUpForm = {
 	name: string;
+	phone: string;
 	password: string;
 	email: string;
 };
@@ -12,22 +14,22 @@ type SignUpForm = {
 export default function SignUp() {
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
+	const host = import.meta.env.VITE_API_URL;
+
 
 	const form = useForm<SignUpForm>();
-
-	const { register, control, handleSubmit, formState } = form;
+	const { register, control, handleSubmit, formState, getValues } = form;
 	const { errors } = formState;
 	const { ref: passwordRef, ...passwordRegister } = register("password", {
 		validate: {
 			minLength: (v) => v.length >= 8 || "Mínimo de 8 caracteres",
-
 			hasSymbol: (v) =>
 				/[!@#$%&*?]/.test(v) || "Deve conter pelo menos um símbolo",
 		},
 	});
 
 	const onSubmit = () => {
-		console.log("sumited...");
+		console.log("sumited...", getValues());
 	};
 
 	const setVisible = () => {
@@ -43,6 +45,11 @@ export default function SignUp() {
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
+				onKeyDown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						setVisible();
+					}
+				}}
 				aria-label={
 					passwordVisible
 						? "Ocultar palavra-passe"
@@ -79,6 +86,112 @@ export default function SignUp() {
 		document.title = "Criar conta";
 	}, []);
 
+	const PhoneInput = useMemo(() => {
+		return React.memo(function PhoneInput({
+			value,
+			onChange,
+			onBlur,
+			error,
+			helperText,
+		}: {
+			value: string;
+			onChange: (v: string) => void;
+			onBlur: () => void;
+			error: boolean;
+			helperText?: string;
+		}) {
+			const [localValue, setLocalValue] = useState<string>(value ?? "");
+			const timerRef = useRef<number | null>(null);
+
+			useEffect(() => {
+				if ((value ?? "") !== localValue) {
+					setLocalValue(value ?? "");
+				}
+			}, [value]);
+
+			useEffect(() => {
+				return () => {
+					if (timerRef.current) {
+						clearTimeout(timerRef.current);
+					}
+				};
+			}, []);
+
+			const handleLocalChange = (v: string) => {
+				setLocalValue(v);
+
+				if (timerRef.current) {
+					clearTimeout(timerRef.current);
+				}
+				timerRef.current = window.setTimeout(() => {
+					onChange(v);
+					timerRef.current = null;
+				}, 300);
+			};
+
+			const handleBlur = () => {
+				if (timerRef.current) {
+					clearTimeout(timerRef.current);
+					timerRef.current = null;
+				}
+				onChange(localValue);
+				onBlur();
+			};
+
+			const slotProps = useMemo(
+				() => ({
+					input: {
+						autoComplete: "tel",
+						"aria-label": "Telefone",
+						inputProps: {
+							maxLength: 25,
+							minLength: 2,
+						},
+					},
+				}),
+				[]
+			);
+
+			const sx = useMemo(
+				() => ({
+					"& .MuiOutlinedInput-root": {
+						minHeight: "20px",
+						paddingTop: "0px",
+						paddingLeft: "8px",
+						paddingBottom: "0px",
+					},
+					"& .MuiTelInput-Flag": {
+						fontSize: "16px",
+					},
+					"& .MuiInputBase-input": {
+						padding: "12px",
+						fontSize: "13px",
+					},
+					"& .MuiFormHelperText-root": {
+						margin: "8px 1px 0px 2px",
+						fontSize: "11px",
+						opacity: 0.7,
+					},
+				}),
+				[]
+			);
+
+			return (
+				<MuiTelInput
+					value={localValue}
+					onChange={handleLocalChange}
+					onBlur={handleBlur}
+					defaultCountry="MZ"
+					label="Telefone"
+					slotProps={slotProps}
+					error={error}
+					helperText={helperText}
+					sx={sx}
+				/>
+			);
+		});
+	}, []);
+
 	return (
 		<div className="h-full p-3 sign-up relative text-sm flex justify-center flex-col items-center">
 			<div className="w-90 rounded-lg bg-white z-10 p-5 flex justify-center flex-col items-center">
@@ -96,8 +209,9 @@ export default function SignUp() {
 						.
 					</p>
 				</div>
+
 				<div className="w-full mb-3">
-					<button className="flex justify-center cursor-pointer text-sm w-full rounded-md font-medium items-center border border-gray-200 p-2 gap-2">
+					<button className="flex justify-center cursor-pointer text-sm w-full rounded-md font-medium items-center border-2 border-gray-200 p-2 gap-2">
 						<img
 							className="w-5"
 							src="/google_icon.svg"
@@ -106,11 +220,13 @@ export default function SignUp() {
 						<p>Entrar com o Google</p>
 					</button>
 				</div>
+
 				<div className="w-full flex gap-1 text-gray-400 font-semibold justify-center items-center">
 					<hr className="w-full h-1" />
 					ou
 					<hr className="w-full" />
 				</div>
+
 				<div className="w-full">
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex gap-1 my-2 flex-col">
@@ -129,7 +245,7 @@ export default function SignUp() {
 									validate: {
 										isValidLength: (value) => {
 											return (
-												(value.length >= 2 &&
+												(value.length >= 3 &&
 													value.length <= 50) ||
 												"Deve ter no minimo 3 letras"
 											);
@@ -138,18 +254,54 @@ export default function SignUp() {
 											return (
 												/^[A-Za-zÀ-ÿ\s'-]+$/.test(
 													value
-												) || "Nome invalido"
+												) || "Nome inválido"
 											);
 										},
 									},
 								})}
-								className={`name border ${
+								className={`name border-2 transition-colors ${
 									errors.name?.message
 										? "border-red-300"
-										: "border-gray-400 "
+										: "border-gray-300 "
 								} w-full p-2 py-5 rounded-sm h-5 text-[12px]`}
 							/>
 							<p className="error">{errors.name?.message}</p>
+						</div>
+
+						<div className="flex gap-1 mt-4 flex-col">
+							<Controller
+								name="phone"
+								control={control}
+								rules={{
+									required: "Número obrigatório",
+									validate: (value) => {
+										const digitsOnly = value.replaceAll(
+											" ",
+											""
+										);
+										const regex = /^\+[1-9]\d{1,14}$/;
+										return (
+											regex.test(digitsOnly) ||
+											"Telefone inválido"
+										);
+									},
+								}}
+								render={({ field, fieldState }) => {
+									// Passa só os campos essenciais para evitar re-renders desnecessários
+									const { value, onChange, onBlur } = field;
+									return (
+										<PhoneInput
+											value={value ?? ""}
+											onChange={onChange}
+											onBlur={onBlur}
+											error={!!fieldState.error}
+											helperText={
+												fieldState.error?.message
+											}
+										/>
+									);
+								}}
+							/>
 						</div>
 
 						<div className="flex gap-1 my-2 flex-col">
@@ -182,14 +334,15 @@ export default function SignUp() {
 										},
 									},
 								})}
-								className={`email border ${
+								className={`email border-2 transition-colors ${
 									errors.email?.message
 										? "border-red-300"
-										: "border-gray-400 "
+										: "border-gray-300 "
 								} w-full p-2 py-5 rounded-sm h-5 text-[12px]`}
 							/>
 							<p className="error">{errors.email?.message}</p>
 						</div>
+
 						<div className="flex gap-1 my-2 flex-col">
 							<label
 								className="ml-1 text-[11px]"
@@ -208,10 +361,10 @@ export default function SignUp() {
 									id="password"
 									aria-label="Palavra-passe"
 									autoComplete="current-password"
-									className={`password border ${
+									className={`password border-2 transition-colors ${
 										errors.password?.message
 											? "border-red-300"
-											: "border-gray-400 "
+											: "border-gray-300 "
 									} w-full p-2 py-5 rounded-sm h-5 text-[12px]`}
 								/>
 
@@ -220,35 +373,15 @@ export default function SignUp() {
 							<p className="error">{errors.password?.message}</p>
 						</div>
 
-						<div className="flex mt-5 justify-between items-center">
-							<div className="flex gap-1 items-center">
-								<input
-									type="checkbox"
-									name="remember"
-									id="remember"
-									aria-label="Lembrar sessão"
-									className="remember bg-white"
-								/>
-								<label
-									className="text-[12px] text-gray-500"
-									htmlFor="remember">
-									Lembrar-me
-								</label>
-							</div>
-
-							<NavLink
-								className="text-[12px] text-purple-400 font-semibold"
-								to={"reset_password"}>
-								Esqueceu a palavra-passe ?
-							</NavLink>
-						</div>
-
-						<div className="w-full mt-6">
-							<button type="submit" className="w-full cursor-pointer transition-colors hover:bg-purple-500 bg-purple-400 p-1 py-2 rounded-sm font-semibold text-white">
+						<div className="w-full mt-2">
+							<button
+								type="submit"
+								className="w-full cursor-pointer transition-colors hover:bg-purple-500 bg-purple-400 p-1 py-2 rounded-sm font-semibold text-white">
 								Criar conta
 							</button>
 						</div>
 					</form>
+
 					<DevTool control={control} />
 				</div>
 			</div>

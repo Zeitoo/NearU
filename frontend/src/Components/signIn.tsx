@@ -6,15 +6,17 @@ import { useForm } from "react-hook-form";
 type SignInForm = {
 	email: string;
 	password: string;
+	session: boolean;
 };
 
 export default function SignIn() {
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
+	const host = import.meta.env.VITE_API_URL;
 
 	const form = useForm<SignInForm>();
 
-	const { register, control, handleSubmit, formState } = form;
+	const { register, control, handleSubmit, formState, getValues } = form;
 	const { errors } = formState;
 
 	const { ref: passwordRef, ...passwordRegister } = register("password", {
@@ -27,7 +29,7 @@ export default function SignIn() {
 	});
 
 	const onSubmit = () => {
-		console.log("sumited...");
+		console.log("sumited...", getValues());
 	};
 
 	const setVisible = () => {
@@ -103,7 +105,7 @@ export default function SignIn() {
 					</p>
 				</div>
 				<div className="w-full mb-3">
-					<button className="flex justify-center cursor-pointer text-sm w-full rounded-md font-medium items-center border border-gray-200 p-2 gap-2">
+					<button className="flex justify-center cursor-pointer text-sm w-full rounded-md font-medium items-center border-2  border-gray-200 p-2 gap-2">
 						<img
 							className="w-5"
 							src="/google_icon.svg"
@@ -151,10 +153,10 @@ export default function SignIn() {
 								placeholder="Endereço de e-mail"
 								aria-label="E-mail"
 								autoComplete="email"
-								className={`email border ${
+								className={`email border-2 transition-colors ${
 									errors.email?.message
 										? "border-red-300"
-										: "border-gray-400 "
+										: "border-gray-300 "
 								} w-full p-2 py-5 rounded-sm h-5 text-[12px]`}
 							/>
 
@@ -178,10 +180,10 @@ export default function SignIn() {
 									id="password"
 									aria-label="Palavra-passe"
 									autoComplete="current-password"
-									className={`password border ${
+									className={`password border-2 transition-colors ${
 										errors.password?.message
 											? "border-red-300"
-											: "border-gray-400 "
+											: "border-gray-300 "
 									} w-full p-2 py-5 rounded-sm h-5 text-[12px]`}
 								/>
 
@@ -191,17 +193,17 @@ export default function SignIn() {
 						</div>
 
 						<div className="flex mt-3 justify-between items-center">
-							<div className="flex gap-1 items-center">
+							<div className="flex pl-1 gap-1 items-center">
 								<input
 									type="checkbox"
-									name="remember"
-									id="remember"
+									id="session"
 									aria-label="Lembrar sessão"
-									className="remember bg-white"
+									{...register("session")}
+									className="session bg-white"
 								/>
 								<label
 									className="text-[12px] text-gray-500"
-									htmlFor="remember">
+									htmlFor="session">
 									Lembrar-me
 								</label>
 							</div>
@@ -214,7 +216,9 @@ export default function SignIn() {
 						</div>
 
 						<div className="w-full mt-4 mb-10">
-							<button type="submit" className="w-full cursor-pointer transition-colors hover:bg-purple-500 bg-purple-400 p-1 py-2 rounded-sm font-semibold text-white">
+							<button
+								type="submit"
+								className="w-full cursor-pointer transition-colors hover:bg-purple-500 bg-purple-400 p-1 py-2 rounded-sm font-semibold text-white">
 								Sign in
 							</button>
 						</div>
