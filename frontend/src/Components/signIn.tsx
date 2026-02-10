@@ -1,35 +1,58 @@
 import { NavLink } from "react-router-dom";
-import { DevTool } from "@hookform/devtools";
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import useSign from "../hooks/useSign";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 
-type SignInForm = {
-	email: string;
-	password: string;
-	session: boolean;
-};
+const formsChema = z.object({
+	email: z.string().nonempty("Email é obrigatório").email("Email inválido"),
+	password: z
+		.string()
+		.nonempty("Palavra-passe é obrigatória")
+		.min(8, "Muito curta")
+		.max(12, "Muito longa")
+		.regex(/[!@#$%&*?]/, {
+			message: "Deve conter pelo menos um símbolo",
+		}),
+	session: z.coerce.boolean().optional(),
+});
+
+type SignInForm = z.infer<typeof formsChema>;
 
 export default function SignIn() {
+	const [loading, setLoading] = useState<boolean>(false);
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
-	const host = import.meta.env.VITE_API_URL;
 
-	const form = useForm<SignInForm>();
+	const navigate = useNavigate();
+	const { signIn } = useSign();
 
-	const { register, control, handleSubmit, formState, getValues } = form;
-	const { errors } = formState;
-
-	const { ref: passwordRef, ...passwordRegister } = register("password", {
-		validate: {
-			minLength: (v) => v.length >= 8 || "Mínimo de 8 caracteres",
-
-			hasSymbol: (v) =>
-				/[!@#$%&*?]/.test(v) || "Deve conter pelo menos um símbolo",
-		},
+	const form = useForm({
+		resolver: zodResolver(formsChema),
 	});
 
-	const onSubmit = () => {
-		console.log("sumited...", getValues());
+	const { register, handleSubmit, formState, setError } = form;
+	const { errors } = formState;
+
+	const { ref: passwordRef, ...passwordRegister } = register("password");
+
+	const onSubmit = (data: SignInForm) => {
+		setLoading(true);
+		signIn(data).then((response) => {
+			setLoading(false);
+			if (response.message === "logged in") {
+				navigate("/");
+			} else if (response.message === "Invalid credentials") {
+				setError("email", {
+					message: "Email ou palavra-passe inválidos",
+				});
+				setError("password", {
+					message: "Email ou palavra-passe inválidos",
+				});
+			}
+		});
 	};
 
 	const setVisible = () => {
@@ -88,8 +111,8 @@ export default function SignIn() {
 	}, []);
 
 	return (
-		<div className="h-full p-4 sign-in relative text-sm flex justify-center flex-col items-center">
-			<div className="w-92 rounded-lg h-125 bg-white z-10 p-5 pt-10 flex justify-center flex-col items-center">
+		<div className="p-4 sign-in relative text-sm flex justify-center flex-col items-center">
+			<div className="w-90 rounded-lg h-120 bg-white z-10 p-5 py-0 flex justify-center flex-col items-center">
 				<div className="my-5 w-full">
 					<h1 className="text-2xl mb-3 font-semibold">
 						Iniciar sessão
@@ -97,7 +120,7 @@ export default function SignIn() {
 					<p className="text-gray-500">
 						Não tem uma conta?{"  "}
 						<NavLink
-							className={"text-purple-400"}
+							className={"text-indigo-400"}
 							to={"/signup"}>
 							Criar conta
 						</NavLink>
@@ -131,24 +154,7 @@ export default function SignIn() {
 							</label>
 							<input
 								type="text"
-								{...register("email", {
-									validate: {
-										isEmpty: (value) => {
-											return (
-												value.trim() !== "" ||
-												"Email é obrigatório"
-											);
-										},
-										format: (value) => {
-											const emailRegex =
-												/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-											return (
-												emailRegex.test(value) ||
-												"Email inválido"
-											);
-										},
-									},
-								})}
+								{...register("email")}
 								id="email"
 								placeholder="Endereço de e-mail"
 								aria-label="E-mail"
@@ -199,7 +205,7 @@ export default function SignIn() {
 									id="session"
 									aria-label="Lembrar sessão"
 									{...register("session")}
-									className="session bg-white"
+									className="session bg-white border-2 border-gray-500"
 								/>
 								<label
 									className="text-[12px] text-gray-500"
@@ -209,21 +215,26 @@ export default function SignIn() {
 							</div>
 
 							<NavLink
-								className="text-[12px] text-purple-400 font-semibold"
+								className="text-[12px] text-indigo-400 font-semibold"
 								to={"reset_password"}>
 								Esqueceu a palavra-passe ?
 							</NavLink>
 						</div>
 
-						<div className="w-full mt-4 mb-10">
+						<div className="w-full mt-4">
 							<button
 								type="submit"
-								className="w-full cursor-pointer transition-colors hover:bg-purple-500 bg-purple-400 p-1 py-2 rounded-sm font-semibold text-white">
-								Sign in
+								className="w-full flex justify-center items-center cursor-pointer transition-colors hover:bg-indigo-500 bg-indigo-400 p-1 py-2 rounded-sm font-semibold text-white">
+								{loading ? (
+									<div>
+										<div className="loader loader-white"></div>
+									</div>
+								) : (
+									<span>Iniciar sessão</span>
+								)}
 							</button>
 						</div>
 					</form>
-					<DevTool control={control} />
 				</div>
 			</div>
 		</div>

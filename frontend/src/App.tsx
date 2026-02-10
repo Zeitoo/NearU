@@ -1,10 +1,15 @@
 import { Outlet } from "react-router-dom";
 
+import Footer from "./Components/Footer";
+
 function App() {
 	return (
 		<>
-			<div className="h-full text-black">
+		
+			<div className="text-black">
 				<Outlet />
+
+				<Footer />
 			</div>
 		</>
 	);

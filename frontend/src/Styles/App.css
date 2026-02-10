@@ -16,7 +16,42 @@
 	border: 2px solid var(--color-indigo-300);
 }
 
+input:hover,
+input:focus {
+	outline: none;
+	border: 2px solid var(--color-indigo-300);
+}
 
+.loader {
+	width: 30px;
+	aspect-ratio: 2;
+	background: var(--_g) 0% 50%, var(--_g) 50% 50%, var(--_g) 100% 50%;
+	background-size: calc(100% / 3) 50%;
+	animation: l3 1s infinite linear;
+}
+
+.loader-black {
+	--_g: no-repeat radial-gradient(circle closest-side, #000 90%, #0000);
+}
+
+.loader-white {
+	--_g: no-repeat radial-gradient(circle closest-side, #ffffff 90%, #0000);
+}
+
+@keyframes l3 {
+	20% {
+		background-position: 0% 0%, 50% 50%, 100% 50%;
+	}
+	40% {
+		background-position: 0% 100%, 50% 0%, 100% 50%;
+	}
+	60% {
+		background-position: 0% 50%, 50% 100%, 100% 0%;
+	}
+	80% {
+		background-position: 0% 50%, 50% 50%, 100% 100%;
+	}
+}
 .sign-in p.error,
 .sign-up p.error {
 	line-height: 0.8em;
@@ -40,3 +75,13 @@
 		margin-block: 12rem;
 	}
 }
+
+.friends-h {
+	color: rgb(11, 139, 224);
+	height: 250px;
+}
+
+footer li:has(.active) {
+	color: var(--color-indigo-500)
+}
+

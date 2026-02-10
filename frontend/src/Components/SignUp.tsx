@@ -2,34 +2,67 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { MuiTelInput } from "mui-tel-input";
+import useSign from "../hooks/useSign";
+import { useNavigate } from "react-router-dom";
 
-type SignUpForm = {
-	name: string;
-	phone: string;
-	password: string;
-	email: string;
-};
+const signupSchema = z.object({
+	name: z
+		.string()
+		.nonempty("Nome é obrigatório")
+		.min(3, "Mínimo de 3 caracteres")
+		.max(50, "Máximo de 50 caracteres")
+		.regex(/^[A-Za-zÀ-ÿ\s'-]+$/, "Nome inválido"),
+	phone: z
+		.string()
+		.nonempty("Obrigatório")
+		.refine((v) => /^\+[1-9]\d{1,14}$/.test(v.replaceAll(" ", "")), {
+			message: "Número inválido",
+		}),
+
+	email: z.string().nonempty("Email é obrigatório").email("Email inválido"),
+	password: z
+		.string()
+		.nonempty("Palavra-passe é obrigatória")
+		.min(8, "Muito curta")
+		.max(12, "Muito longa")
+		.regex(/[!@#$%&*?]/, {
+			message: "Deve conter pelo menos um símbolo",
+		}),
+	avatar: z.number(),
+});
+
+type SignUpForm = z.infer<typeof signupSchema>;
 
 export default function SignUp() {
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
-	const host = import.meta.env.VITE_API_URL;
+	const [loading, setLoading] = useState<boolean>(false);
 
-
-	const form = useForm<SignUpForm>();
-	const { register, control, handleSubmit, formState, getValues } = form;
-	const { errors } = formState;
-	const { ref: passwordRef, ...passwordRegister } = register("password", {
-		validate: {
-			minLength: (v) => v.length >= 8 || "Mínimo de 8 caracteres",
-			hasSymbol: (v) =>
-				/[!@#$%&*?]/.test(v) || "Deve conter pelo menos um símbolo",
+	const navigate = useNavigate();
+	const { signUp } = useSign();
+	const form = useForm({
+		resolver: zodResolver(signupSchema),
+		defaultValues: {
+			avatar: Math.floor(Math.random() * 46),
 		},
 	});
+	const { register, control, handleSubmit, formState, setError } = form;
+	const { errors } = formState;
+	const { ref: passwordRef, ...passwordRegister } = register("password");
 
-	const onSubmit = () => {
-		console.log("sumited...", getValues());
+	const onSubmit = (data: SignUpForm) => {
+		setLoading(true);
+		signUp(data).then((response) => {
+			setLoading(false);
+			if (response.message === "registered") {
+				navigate("/login");
+			} else if (response.message === "already exists") {
+				setError("email", { message: "Email já existe" });
+			}
+		});
 	};
 
 	const setVisible = () => {
@@ -193,7 +226,7 @@ export default function SignUp() {
 	}, []);
 
 	return (
-		<div className="h-full p-3 sign-up relative text-sm flex justify-center flex-col items-center">
+		<div className="p-3 sign-up relative text-sm flex justify-center flex-col items-center">
 			<div className="w-90 rounded-lg bg-white z-10 p-5 flex justify-center flex-col items-center">
 				<div className="my-5 w-full">
 					<h1 className="text-2xl mb-3 font-semibold">
@@ -202,7 +235,7 @@ export default function SignUp() {
 					<p className="text-gray-500">
 						Já tem uma conta?{"  "}
 						<NavLink
-							className={"text-purple-400"}
+							className={"font-semibold text-indigo-400"}
 							to={"/signin"}>
 							Inicie sessão
 						</NavLink>
@@ -241,24 +274,7 @@ export default function SignUp() {
 								placeholder="Nome Completo"
 								aria-label="given-name"
 								autoComplete="given-name"
-								{...register("name", {
-									validate: {
-										isValidLength: (value) => {
-											return (
-												(value.length >= 3 &&
-													value.length <= 50) ||
-												"Deve ter no minimo 3 letras"
-											);
-										},
-										isValidName: (value) => {
-											return (
-												/^[A-Za-zÀ-ÿ\s'-]+$/.test(
-													value
-												) || "Nome inválido"
-											);
-										},
-									},
-								})}
+								{...register("name")}
 								className={`name border-2 transition-colors ${
 									errors.name?.message
 										? "border-red-300"
@@ -272,22 +288,8 @@ export default function SignUp() {
 							<Controller
 								name="phone"
 								control={control}
-								rules={{
-									required: "Número obrigatório",
-									validate: (value) => {
-										const digitsOnly = value.replaceAll(
-											" ",
-											""
-										);
-										const regex = /^\+[1-9]\d{1,14}$/;
-										return (
-											regex.test(digitsOnly) ||
-											"Telefone inválido"
-										);
-									},
-								}}
+								defaultValue=" "
 								render={({ field, fieldState }) => {
-									// Passa só os campos essenciais para evitar re-renders desnecessários
 									const { value, onChange, onBlur } = field;
 									return (
 										<PhoneInput
@@ -316,24 +318,7 @@ export default function SignUp() {
 								placeholder="Endereço de e-mail"
 								aria-label="E-mail"
 								autoComplete="email"
-								{...register("email", {
-									validate: {
-										isEmpty: (value) => {
-											return (
-												value.trim() !== "" ||
-												"Email é obrigatório"
-											);
-										},
-										format: (value) => {
-											const emailRegex =
-												/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-											return (
-												emailRegex.test(value) ||
-												"Email inválido"
-											);
-										},
-									},
-								})}
+								{...register("email")}
 								className={`email border-2 transition-colors ${
 									errors.email?.message
 										? "border-red-300"
@@ -376,8 +361,14 @@ export default function SignUp() {
 						<div className="w-full mt-2">
 							<button
 								type="submit"
-								className="w-full cursor-pointer transition-colors hover:bg-purple-500 bg-purple-400 p-1 py-2 rounded-sm font-semibold text-white">
-								Criar conta
+								className="w-full flex justify-center items-center cursor-pointer transition-colors hover:bg-indigo-500 bg-indigo-400 p-1 py-2 rounded-sm font-semibold text-white">
+								{loading ? (
+									<div>
+										<div className="loader loader-white"></div>
+									</div>
+								) : (
+									<span>Criar conta</span>
+								)}
 							</button>
 						</div>
 					</form>
