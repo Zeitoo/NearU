@@ -1,9 +1,17 @@
 import { Request } from "express";
 import { RowDataPacket } from "mysql2";
 
-export interface AuthRequest extends Request {
-	userId?: number;
+interface userJwt {
+	id?: number;
 	userEmail?: string;
+	user_name?: string;
+}
+
+export interface AuthRequest extends Request {
+	user?: {
+		id: number;
+		user_name: string;
+	};
 }
 
 export interface User {

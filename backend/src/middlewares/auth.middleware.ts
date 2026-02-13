@@ -4,19 +4,14 @@ import { sanitizeString } from "../utils/auth";
 import { signinSchema, signupSchema } from "../utils/zodSchemas";
 import type { SignInForm } from "../utils/zodSchemas";
 import type { SignUpForm } from "../utils/zodSchemas";
-import jwt, {JsonWebTokenError, TokenExpiredError} from "jsonwebtoken";
+import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 interface JwtPayloadWithId extends jwt.JwtPayload {
 	id: number;
 	user_name: string;
 }
 
-interface AuthRequest extends Request {
-	user?: {
-		id: number;
-		user_name: string;
-	};
-}
+import type { AuthRequest } from "../types";
 
 export default class authMiddleware {
 	static login(req: Request, res: Response, next: NextFunction) {
@@ -54,10 +49,13 @@ export default class authMiddleware {
 	static verifyJwt(req: AuthRequest, res: Response, next: NextFunction) {
 		const authorization =
 			req.headers["authorization"] ?? req.headers.authorization;
+
 		const access_token =
 			typeof authorization === "string"
 				? authorization.split(" ")[1]
 				: undefined;
+
+		console.log(access_token);
 		if (!access_token || !process.env.AUTHORIZATION_SECRET) {
 			return res.status(401).json({ message: "Credenciais ausentes." });
 		}
@@ -72,7 +70,9 @@ export default class authMiddleware {
 					.status(403)
 					.json({ message: "Token inválido ou payload incompleto." });
 			}
+
 			req.user = data;
+			console.log(req.user);
 
 			return next();
 		} catch (err) {
