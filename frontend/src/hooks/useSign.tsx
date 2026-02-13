@@ -16,30 +16,39 @@ function useSign() {
 	const host = import.meta.env.VITE_API_URL;
 
 	const signIn = async (data: signInType) => {
-		const response = await fetch(`${host}/api/auth/login`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(data),
-		});
+		try {
+			const response = await fetch(`${host}/api/auth/login`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				credentials: "include",
+			});
 
-		const message = await response.json();
+			const message = await response.json();
 
-		return message;
+			return message;
+		} catch (error: any) {
+			return { message: error.message };
+		}
 	};
 
 	const signUp = async (data: signUpType) => {
-		const response = await fetch(`${host}/api/auth/register`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(data),
-		});
+		try {
+			const response = await fetch(`${host}/api/auth/register`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
 
-		const message = await response.json();
-		return message;
+			const message = await response.json();
+			return message;
+		} catch (error: any) {
+			return { message: error.message };
+		}
 	};
 
 	return {

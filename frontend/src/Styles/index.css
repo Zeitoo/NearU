@@ -70,7 +70,7 @@ input[type="checkbox"].switch {
 	min-height: 1.3em;
 	padding: 5px;
 	border-radius: 100px;
-	transition: all ease-in-out .2s;
+	transition: all ease-in-out 0.2s;
 }
 
 input[type="checkbox"].switch:checked {
@@ -88,10 +88,81 @@ input[type="checkbox"].switch::before {
 	top: 50%;
 	left: 2px;
 	translate: 0px -50%;
-	transition: all ease-in-out .2s;
+	transition: all ease-in-out 0.2s;
 }
 
 input[type="checkbox"].switch:checked::before {
 	left: 79%;
 	translate: -50% -50%;
+}
+
+.loader {
+	width: 30px;
+	aspect-ratio: 2;
+	background: var(--_g) 0% 50%, var(--_g) 50% 50%, var(--_g) 100% 50%;
+	background-size: calc(100% / 3) 50%;
+	animation: l3 1s infinite linear;
+}
+
+.loader-black {
+	--_g: no-repeat radial-gradient(circle closest-side, #000 90%, #0000);
+}
+
+.loader-blue {
+	--_g: no-repeat radial-gradient(circle closest-side, #006eff 90%, #0000);
+}
+
+
+.loader-white {
+	--_g: no-repeat radial-gradient(circle closest-side, #ffffff 90%, #0000);
+}
+
+@keyframes l3 {
+	20% {
+		background-position: 0% 0%, 50% 50%, 100% 50%;
+	}
+	40% {
+		background-position: 0% 100%, 50% 0%, 100% 50%;
+	}
+	60% {
+		background-position: 0% 50%, 50% 100%, 100% 0%;
+	}
+	80% {
+		background-position: 0% 50%, 50% 50%, 100% 100%;
+	}
+}
+
+@keyframes appear {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.appear {
+	animation: appear 0.6s ease-in-out;
+}
+
+.appear-1 {
+	animation: appear 1s ease-in;
+}
+
+.appear-2 {
+	animation: appear 2s ease-in-out;
+}
+
+.btn {
+	padding: 11px;
+	border-radius: 5px;
+}
+
+.text-xsm {
+	font-size: 11px;
+}
+
+.modal {
+	background-color: rgba(255, 255, 255, 0.123);
+	backdrop-filter: blur(3px);
 }

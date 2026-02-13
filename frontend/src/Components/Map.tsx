@@ -12,7 +12,7 @@ export default function Map() {
 
 	return (
 		<div className="relative h-dvh">
-			<div className="fixed top-3 w-full px-8 z-10">
+			<div className="fixed top-3 w-full px-4 z-10">
 				<div className="relative">
 					<input
 						type="text"

@@ -14,6 +14,9 @@ import SignUp from "./Components/SignUp.tsx";
 import Map from "./Components/Map.tsx";
 import Friends from "./Components/Friends.tsx";
 import Settings from "./Components/Settings.tsx";
+import { AuthProvider } from "./Contexts/AuthContext.tsx";
+import UserProvider from "./Contexts/UserContext.tsx";
+import Logout from "./Components/Logout.tsx";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -46,6 +49,14 @@ const router = createBrowserRouter(
 				element={<Settings />}
 			/>
 			<Route
+				path="logout"
+				element={<Logout />}
+			/>
+			<Route
+				path="signout"
+				element={<Logout />}
+			/>
+			<Route
 				path="*"
 				element={<div>Pagina nao encontrada</div>}
 			/>
@@ -55,6 +66,10 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<RouterProvider router={router}></RouterProvider>
+		<UserProvider>
+			<AuthProvider>
+				<RouterProvider router={router} />
+			</AuthProvider>
+		</UserProvider>
 	</StrictMode>
 );
