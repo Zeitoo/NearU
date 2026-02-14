@@ -22,8 +22,6 @@ input:focus {
 	border: 2px solid var(--color-indigo-300);
 }
 
-
-
 .sign-in p.error,
 .sign-up p.error {
 	line-height: 0.8em;
@@ -53,11 +51,25 @@ input:focus {
 	height: 250px;
 }
 
-#root:has(.sign) footer{
+#root:has(.sign) footer {
 	display: none;
 }
 
 footer li:has(.active) {
-	color: var(--color-indigo-500)
+	color: var(--color-indigo-500);
 }
 
+.drop-down .options {
+	opacity: 0;
+	touch-action: none;
+	pointer-events: none;
+	user-select: none;
+	transition: all 0.2s ease-in-out;
+}
+
+.drop-down:has(button:focus) .options {
+	opacity: 1;
+	touch-action: all;
+	pointer-events: all;
+	user-select: none;
+}

@@ -5,7 +5,6 @@ export default function Map() {
 
 	const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-	console.log(isMobile);
 	const friendsBtnHandler = () => {
 		setFriendsExpanded(!friendsExpanded);
 	};
@@ -57,12 +56,10 @@ export default function Map() {
 						onTouchStart={() => {
 							if (isMobile) {
 								friendsBtnHandler();
-								console.log("mobile");
 							}
 						}}
 						onClick={() => {
 							if (!isMobile) {
-								console.log("button")
 								friendsBtnHandler();
 							}
 						}}

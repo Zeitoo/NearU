@@ -17,7 +17,7 @@ export default function Settings() {
 
 
 	return (
-		<div className="settings flex flex-col text-sm pb-20">
+		<div className="settings select-none flex flex-col text-sm pb-20">
 			<header className="flex justify-center p-2.5 border-b border-gray-300">
 				<h1 className="font-medium text-md text-gray-600">
 					configurações

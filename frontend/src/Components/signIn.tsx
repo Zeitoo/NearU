@@ -30,7 +30,8 @@ export default function SignIn() {
 		setLoading(true);
 		signIn(data).then((response) => {
 			setLoading(false);
-			if (response.message === "logged in") {
+			console.log(response);
+			if (response.message.includes("sucesso")) {
 				navigate("/");
 			} else if (response.message === "Invalid credentials") {
 				setError("email", {

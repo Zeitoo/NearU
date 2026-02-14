@@ -1,9 +1,16 @@
-import { createContext, useContext, useState, useRef, useEffect } from "react";
+import {
+	createContext,
+	useContext,
+	useState,
+	useRef,
+	useEffect,
+	useCallback,
+} from "react";
 import type { ReactNode } from "react";
 import { api } from "../auth/auth";
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import { useUser } from "../hooks/useUser";
-import type {User} from "../types"
+import type { User } from "../types";
 
 interface AuthContextType {
 	user: User | null;
@@ -14,14 +21,59 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const {user, setUser} = useUser()
+	const { user, setUser } = useUser();
 	const [loading, setLoading] = useState(true);
-
 	const accessTokenRef = useRef<string | null>(null);
+	const isRefreshingRef = useRef(false);
+	const refreshPromiseRef = useRef<Promise<any> | null>(null);
+	const hasInitializedRef = useRef(false); // Previne double mount do Strict Mode
 
-	const setAccessToken = (token: string | null) => {
+	const setAccessToken = useCallback((token: string | null) => {
 		accessTokenRef.current = token;
-	};
+	}, []);
+
+	const logout = useCallback(async () => {
+		try {
+			await api.post("/api/auth/logout");
+		} catch (error) {
+			console.error("Erro ao fazer logout:", error);
+		} finally {
+			setAccessToken(null);
+			setUser(null);
+			refreshPromiseRef.current = null;
+			isRefreshingRef.current = false;
+		}
+	}, [setAccessToken, setUser]);
+
+	// Função centralizada de refresh que evita chamadas duplicadas
+	const refreshAccessToken = useCallback(async () => {
+		// Se já está fazendo refresh, retorna a promise existente
+		if (refreshPromiseRef.current) {
+			return refreshPromiseRef.current;
+		}
+
+		// Cria uma nova promise de refresh
+		refreshPromiseRef.current = (async () => {
+			try {
+				const res = await api.get("/api/auth/refresh");
+				const { access_token, user } = res.data;
+
+				setAccessToken(access_token);
+				setUser(user);
+
+				return { access_token, user };
+			} catch (error) {
+				setAccessToken(null);
+				setUser(null);
+				throw error;
+			} finally {
+				// Limpa a promise após completar
+				refreshPromiseRef.current = null;
+			}
+		})();
+
+		return refreshPromiseRef.current;
+	}, [setAccessToken, setUser]);
 
 	/* ========= REQUEST INTERCEPTOR ========= */
 	useEffect(() => {
@@ -51,19 +103,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 					originalRequest._retry = true;
 
 					try {
-						const res = await api.get("api/auth/refresh");
-						const { access_token, user } = res.data;
+						// Usa a função centralizada que previne múltiplos refresh
+						const { access_token } = await refreshAccessToken();
 
-						setAccessToken(access_token);
-						setUser(user);
-
-						originalRequest.headers = originalRequest.headers ?? {};
-						originalRequest.headers.Authorization = `Bearer ${access_token}`;
+						// Atualiza o header da requisição original
+						if (originalRequest.headers) {
+							originalRequest.headers.Authorization = `Bearer ${access_token}`;
+						}
 
 						return api(originalRequest);
-					} catch(error) {
-						console.log(error);
-						setAccessToken(null);
+					} catch (refreshError) {
+						// Se o refresh falhar, faz logout
+						await logout();
+						return Promise.reject(refreshError);
 					}
 				}
 
@@ -74,38 +126,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		return () => {
 			api.interceptors.response.eject(responseInterceptor);
 		};
-	}, []);
+	}, [refreshAccessToken, logout]);
 
 	/* ========= AUTO REFRESH AO INICIAR ========= */
 	useEffect(() => {
+		// Previne execução duplicada no Strict Mode
+		if (hasInitializedRef.current) {
+			return;
+		}
+
+		hasInitializedRef.current = true;
+
 		const initAuth = async () => {
 			try {
-				const res = await api.get("api/auth/refresh");
-
-				console.log(res);
-				const { accessToken, user } = res.data;
-
-				setAccessToken(accessToken);
-				setUser(user);
-			} catch {
-				setAccessToken(null);
+				await refreshAccessToken();
+			} catch (error) {
+				console.error("Erro ao inicializar auth:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
 
 		initAuth();
-	}, []);
 
-	/* ========= LOGOUT ========= */
-	const logout = async () => {
-		try {
-			await api.post("api/auth/logout");
-		} finally {
-			setAccessToken(null);
-			setUser(null);
-		}
-	};
+		// Cleanup: reseta a flag se o componente desmontar
+		return () => {
+			// Não resetar no Strict Mode para evitar re-inicialização
+			// hasInitializedRef.current = false;
+		};
+	}, [refreshAccessToken]);
 
 	return (
 		<AuthContext.Provider
@@ -121,10 +170,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
 	const context = useContext(AuthContext);
-
 	if (!context) {
 		throw new Error("useAuth deve ser usado dentro de AuthProvider");
 	}
-
 	return context;
 }

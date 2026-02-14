@@ -17,6 +17,7 @@ import Settings from "./Components/Settings.tsx";
 import { AuthProvider } from "./Contexts/AuthContext.tsx";
 import UserProvider from "./Contexts/UserContext.tsx";
 import Logout from "./Components/Logout.tsx";
+import { ProtectedRoute } from "./Components/Protected.tsx";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -42,7 +43,11 @@ const router = createBrowserRouter(
 			/>
 			<Route
 				path="friends"
-				element={<Friends />}
+				element={
+					<ProtectedRoute>
+						<Friends />
+					</ProtectedRoute>
+				}
 			/>
 			<Route
 				path="settings"
