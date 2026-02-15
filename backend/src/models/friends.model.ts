@@ -1,6 +1,6 @@
 import { pool } from "../configs/db.config";
 import type { ResultSetHeader } from "mysql2";
-
+import type { friendsResponseSql } from "../types";
 export const putFriendship = async (requester: number, addressee: number) => {
 	try {
 		const [result] = await pool.query<ResultSetHeader>(
@@ -109,6 +109,8 @@ export const removeFriendship = async (
 		[authUserId, otherUserId, authUserId, otherUserId]
 	);
 
+	console.log("sql response: ", result);
+
 	if (result.affectedRows === 0) {
 		return {
 			success: false,
@@ -117,4 +119,44 @@ export const removeFriendship = async (
 	}
 
 	return { success: true };
+};
+
+export const getFriends = async (
+	user_id: number
+): Promise<friendsResponseSql[]> => {
+	try {
+		const [rows] = await pool.query(
+			`
+			SELECT
+    			f.id,
+    			f.status,
+    			f.requester_id,
+    			f.addressee_id,
+    			u.id AS other_user_id,
+    			u.user_name,
+    			u.profile_img,
+				
+				CASE
+					WHEN f.status = 'accepted' THEN 'friends'
+					WHEN f.status = 'pending' AND f.requester_id = ? THEN 'sent'
+					WHEN f.status = 'pending' AND f.addressee_id = ? THEN 'received'
+					WHEN f.status = 'blocked' AND f.requester_id = ? THEN 'blocked'
+					WHEN f.status = 'blocked' AND f.addressee_id = ? THEN 'blocked_by'
+					ELSE 'other'
+				END AS relation_type
+
+			FROM friendships f
+			JOIN users u
+				ON u.id = IF(f.requester_id = ?, f.addressee_id, f.requester_id)
+
+			WHERE ? IN (f.requester_id, f.addressee_id);
+			`,
+			[user_id, user_id, user_id, user_id, user_id, user_id]
+		);
+
+		return rows as friendsResponseSql[];
+	} catch (error) {
+		console.log("Error getting friends", error);
+		return [];
+	}
 };

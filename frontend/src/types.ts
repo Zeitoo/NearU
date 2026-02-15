@@ -14,6 +14,7 @@ export interface friendsResponseSql {
 	other_user_id: number;
 	user_name: string;
 	profile_img: number;
+	online?: boolean;
 	relation_type: RelationType;
 }
 export interface friendsResponse {

@@ -27,7 +27,11 @@ export default function FriendsCard({
 				{friendType.map((friend, index) => {
 					return (
 						<div
-							className="min-h-2 bg-blue-50 hover:bg-blue-100 gap-1 transition-all my-3 flex items-center p-3 py-6 rounded-lg cursor-pointer"
+							className={`min-h-2 ${
+								friend.online
+									? "bg-green-200 hover:bg-green-300"
+									: "bg-blue-50 hover:bg-blue-100"
+							}  gap-1 transition-all my-3 flex items-center p-3 py-6 rounded-lg cursor-pointer`}
 							key={index}>
 							<div className="flex active-avatar overflow-hidden rounded-full items-center">
 								<img

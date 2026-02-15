@@ -1,5 +1,6 @@
 import type { Response, Request } from "express";
-import type { AuthRequest } from "../types";
+import type { AuthRequest, friendsResponseSql, RelationType } from "../types";
+import { getFriends } from "../models/friends.model";
 
 import {
 	putFriendship,
@@ -8,9 +9,46 @@ import {
 	removeFriendship,
 	rejectFriendship,
 } from "../models/friends.model";
+import { onlineUsers } from "../state/onLineUsers";
 export default class friends {
+	static async listFriends(req: AuthRequest, res: Response) {
+		const onlineusers = onlineUsers.getAll();
+		const user_id = req.user?.id;
+
+		const result: Record<RelationType, friendsResponseSql[]> = {
+			friends: [],
+			sent: [],
+			received: [],
+			blocked: [],
+			blocked_by: [],
+		};
+		if (!user_id)
+			return res.status(400).json({
+				message: "Erro na autenticacao...",
+			});
+
+		const response = await getFriends(user_id);
+
+		if (response.length < 1)
+			return res.status(200).json({ message: "Zero friends", result });
+
+		response.map(
+			(element) =>
+				(element.online = onlineusers.includes(element.other_user_id))
+		);
+		for (const row of response) {
+			result[row.relation_type].push(row);
+		}
+
+		res.status(200).json({ message: "Success", result });
+	}
 	static async addFriends(req: AuthRequest, res: Response) {
 		const { friendId } = req.body;
+
+		if (!friendId)
+			return res
+				.status(400)
+				.json({ message: "ID do usuário é obrigatório." });
 
 		if (!req.user?.id)
 			return res.status(400).json({
@@ -29,6 +67,10 @@ export default class friends {
 	static async blockFriends(req: AuthRequest, res: Response) {
 		const { friendId } = req.body;
 
+		if (!friendId)
+			return res
+				.status(400)
+				.json({ message: "ID do usuário é obrigatório." });
 		if (!req.user?.id)
 			return res.status(400).json({
 				message: "Erro desconhecido ao bloquear usuario...",
@@ -63,7 +105,14 @@ export default class friends {
 	}
 
 	static async removeFriends(req: AuthRequest, res: Response) {
+		console.log("req recebido");
 		const { friendId } = req.body;
+		if (!friendId)
+			return res
+				.status(400)
+				.json({ message: "ID do usuário é obrigatório." });
+
+		console.log("removendo amizade entre", req.user?.id, friendId);
 
 		if (!req.user?.id)
 			return res.status(400).json({
@@ -82,6 +131,11 @@ export default class friends {
 
 	static async acceptFriends(req: AuthRequest, res: Response) {
 		const { friendId } = req.body;
+
+		if (!friendId)
+			return res
+				.status(400)
+				.json({ message: "ID do usuário é obrigatório." });
 
 		if (!req.user?.id)
 			return res.status(400).json({

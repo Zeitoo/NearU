@@ -16,6 +16,8 @@ interface AuthContextType {
 	user: User | null;
 	loading: boolean;
 	logout: () => Promise<void>;
+	logged: boolean;
+	accessTokenRef:  React.RefObject<string | null>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -24,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const { user, setUser } = useUser();
 	const [loading, setLoading] = useState(true);
 	const accessTokenRef = useRef<string | null>(null);
+	const [logged, setLogged] = useState<boolean>(false);
 	const isRefreshingRef = useRef(false);
 	const refreshPromiseRef = useRef<Promise<any> | null>(null);
 	const hasInitializedRef = useRef(false); // Previne double mount do Strict Mode
@@ -61,6 +64,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				setAccessToken(access_token);
 				setUser(user);
 
+				const message = res.data.message as string;
+
+				if (
+					!window.location.pathname.includes("login") &&
+					message.includes("login")
+				) {
+					console.log("redirecting...");
+					window.location.href = "login";
+				} else if (res.status === 200) {
+					setLogged(true);
+				}
 				return { access_token, user };
 			} catch (error) {
 				setAccessToken(null);
@@ -162,6 +176,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				user,
 				loading,
 				logout,
+				logged,
+				accessTokenRef
 			}}>
 			{children}
 		</AuthContext.Provider>

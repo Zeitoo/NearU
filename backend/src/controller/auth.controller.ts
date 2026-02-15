@@ -74,15 +74,15 @@ export default class auth {
 
 		if (!refresh_token)
 			return res
-				.status(400)
-				.json({ message: "Refresh token não fornecido." });
+				.status(200)
+				.json({ message: "Refresh token não fornecido. Por favor fazer login" });
 
 		const response = await getRefreshToken(refresh_token);
 
 		if (!response) {
 			//onproduction change
 
-			res.status(400).json({ message: "Refresh token inválido." });
+			res.status(200).json({ message: "Refresh token inválido." });
 
 			return;
 		}
@@ -97,7 +97,9 @@ export default class auth {
 
 		const resposta = await putRefreshToken(refreshToken, user.user_id);
 		if (!resposta)
-			return res.status(500).json({ message: "Houve um erro no login." });
+			return res
+				.status(500)
+				.json({ message: "Houve um erro no refresh." });
 
 		res.cookie("refresh_token", refreshToken, {
 			httpOnly: true,
@@ -136,9 +138,7 @@ export default class auth {
 		}, 4000);
 	}
 
-	static async activate(req: Request, res: Response) {
-		
-	}
+	static async activate(req: Request, res: Response) {}
 
 	static async test(req: Request, res: Response) {
 		res.send(generatAccessToken({ id: 1, user_name: "test" }));

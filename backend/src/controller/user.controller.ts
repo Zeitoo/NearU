@@ -17,7 +17,7 @@ export default class user {
 			users: response.map((element) => {
 				return {
 					user_name: element.user_name,
-					profiles_img: element.profile_img,
+					profile_img: element.profile_img,
 					id: element.id,
 				};
 			}),

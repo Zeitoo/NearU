@@ -5,7 +5,7 @@ import crypto from "crypto";
 export const generatAccessToken = (user: UserToken) => {
 	if (process.env.AUTHORIZATION_SECRET) {
 		return jwt.sign(user, process.env.AUTHORIZATION_SECRET, {
-			expiresIn: "40m",
+			expiresIn: "1m",
 		});
 	}
 };

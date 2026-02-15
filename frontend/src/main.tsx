@@ -19,6 +19,7 @@ import UserProvider from "./Contexts/UserContext.tsx";
 import Logout from "./Components/Logout.tsx";
 import { ProtectedRoute } from "./Components/Protected.tsx";
 
+
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route

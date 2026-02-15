@@ -55,7 +55,6 @@ export default class authMiddleware {
 				? authorization.split(" ")[1]
 				: undefined;
 
-		console.log(access_token);
 		if (!access_token || !process.env.AUTHORIZATION_SECRET) {
 			return res.status(401).json({ message: "Credenciais ausentes." });
 		}
@@ -72,7 +71,6 @@ export default class authMiddleware {
 			}
 
 			req.user = data;
-			console.log(req.user);
 
 			return next();
 		} catch (err) {
