@@ -1,4 +1,4 @@
-import  {
+import {
 	createContext,
 	useContext,
 	useEffect,
@@ -39,6 +39,9 @@ export const WebSocketProvider = ({
 
 		socket.onopen = () => {
 			setStatus("OPEN");
+			setInterval(() => {
+				socket.send(JSON.stringify({ message: "hi my niggaaa." }));
+			}, 2000);
 		};
 
 		socket.onmessage = (event) => {

@@ -40,9 +40,10 @@ export default function FriendsCard({
 								/>
 							</div>
 
-							<div className="flex-1 w-full ml-1 font-semibold text-gray-600 items-center flex text-[12px]">
+							<div className="flex-1 w-full ml-1 font-semibold text-gray-600 justify-center flex items-start flex-col text-[12px]">
 								<p>{friend.user_name}</p>
 								<p>{friend.other_user_id}</p>
+								{friend.online? (<p className="text-green-700 ml-1.5 font-semibold">Online</p>) : ""}
 							</div>
 
 							<DropDown

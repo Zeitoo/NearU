@@ -20,27 +20,26 @@ export const putFriendship = async (requester: number, addressee: number) => {
 		return { success: false };
 	}
 };
-export const blockFriendship = async (requester: number, addressee: number) => {
+export const blockFriendship = async (
+	authUserId: number,
+	otherUserId: number
+) => {
 	try {
 		const [result] = await pool.query<ResultSetHeader>(
-			`INSERT INTO friendships (requester_id, addressee_id, status)
-                VALUES (?, ?, 'blocked')
-                ON DUPLICATE KEY UPDATE
-                status = 'blocked',
-                updated_at = CURRENT_TIMESTAMP;`,
-			[requester, addressee]
+			`
+			INSERT INTO friendships (requester_id, addressee_id, status, blocked_by)
+			VALUES (?, ?, 'blocked', ?)
+			ON DUPLICATE KEY UPDATE
+				status = 'blocked',
+				blocked_by = ?,
+				updated_at = CURRENT_TIMESTAMP
+			`,
+			[authUserId, otherUserId, authUserId, authUserId]
 		);
 
-		if (result.affectedRows > 0) {
-			return {
-				success: true,
-				insertId: result.insertId,
-			};
-		}
-
-		return { success: false };
+		return result.affectedRows > 0;
 	} catch (error) {
-		return { success: false };
+		return false;
 	}
 };
 
@@ -159,4 +158,22 @@ export const getFriends = async (
 		console.log("Error getting friends", error);
 		return [];
 	}
+};
+
+export const unblockFriendship = async (
+	authUserId: number,
+	otherUserId: number
+) => {
+	const [result] = await pool.query<ResultSetHeader>(
+		`
+		DELETE FROM friendships
+		WHERE user_low = LEAST(?, ?)
+		  AND user_high = GREATEST(?, ?)
+		  AND status = 'blocked'
+		  AND blocked_by = ?
+		`,
+		[authUserId, otherUserId, authUserId, otherUserId, authUserId]
+	);
+
+	return result.affectedRows > 0;
 };

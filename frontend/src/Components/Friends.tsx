@@ -1,19 +1,10 @@
 import { useState, useEffect } from "react";
 import { api } from "../auth/auth";
-import type { friendsResponseSql } from "../types";
 import FriendsCard from "./FriendsCard";
 import SearchCard from "./SearchCard";
-
-interface friendsReq {
-	message: string;
-	result: {
-		friends: friendsResponseSql[];
-		sent: friendsResponseSql[];
-		received: friendsResponseSql[];
-		blocked: friendsResponseSql[];
-		blocked_by: friendsResponseSql[];
-	};
-}
+import type { friendsReq, friendsResponseSql } from "../types";
+import useFriend from "../hooks/useFriend";
+import { useUser } from "../hooks/useUser";
 
 const intialFriends = {
 	message: "",
@@ -26,50 +17,15 @@ const intialFriends = {
 	},
 };
 
-interface User {
-	id: number;
-	phone_number: string;
-	user_name: string;
-	email_address: string;
-	profile_img: number;
-}
-
 export default function Friends() {
 	const [value, setValue] = useState<string>("");
 	const [Friends, setFriends] = useState<friendsReq>(intialFriends);
-	const [foundUsers, setFoundUsers] = useState<User[]>([]);
+	const [foundUsers, setFoundUsers] = useState<friendsResponseSql[]>([]);
 
-	const removeFriend = async (friendId: number) => {
-		try {
-			const response = await api.post("api/friends/remove", { friendId });
+	const { acceptRequest, blockFriend, removeFriend, unblockFriend } =
+		useFriend(setFriends);
 
-			if (response.status === 200) {
-				setFriends((prev) => ({
-					...prev,
-					result: {
-						...prev.result,
-						friends: prev.result.friends.filter(
-							(u) => u.other_user_id !== friendId
-						),
-						sent: prev.result.sent.filter(
-							(u) => u.other_user_id !== friendId
-						),
-						received: prev.result.received.filter(
-							(u) => u.other_user_id !== friendId
-						),
-						blocked_by: prev.result.blocked_by.filter(
-							(u) => u.other_user_id !== friendId
-						),
-					},
-				}));
-			}
-		} catch (error: any) {
-			console.error(
-				"Erro ao remover amigo:",
-				error?.response?.data || error.message
-			);
-		}
-	};
+	const { user } = useUser();
 
 	const fetchUsers = async () => {
 		if (value.length > 0) {
@@ -92,58 +48,33 @@ export default function Friends() {
 		}
 	};
 
-	const blockFriend = async (friendId: number) => {
-		try {
-			const response = await api.post("api/friends/block", { friendId });
-
-			if (response.status === 200) {
-				setFriends((prev) => ({
-					...prev,
-					result: {
-						...prev.result,
-						friends: prev.result.friends.filter(
-							(u) => u.other_user_id !== friendId
-						),
-						sent: prev.result.sent.filter(
-							(u) => u.other_user_id !== friendId
-						),
-						received: prev.result.received.filter(
-							(u) => u.other_user_id !== friendId
-						),
-						blocked: [
-							...prev.result.blocked,
-							{
-								other_user_id: friendId,
-							} as friendsResponseSql,
-						],
-					},
-				}));
-			}
-		} catch (error: any) {
-			console.error(
-				"Erro ao bloquear:",
-				error?.response?.data || error.message
-			);
-		}
-	};
-
 	const addRequest = async (friendId: number) => {
 		try {
 			const response = await api.post("api/friends/add", { friendId });
 
 			if (response.status === 200) {
-				setFriends((prev) => ({
-					...prev,
-					result: {
-						...prev.result,
-						sent: [
-							...prev.result.sent,
-							{
-								other_user_id: friendId,
-							} as friendsResponseSql,
-						],
-					},
-				}));
+				setFriends((prev) => {
+					const [addedUsers] = foundUsers.filter(
+						(element) => element.id == friendId
+					);
+
+					if (!addedUsers) return prev;
+
+					return {
+						...prev,
+						result: {
+							...prev.result,
+							sent: [
+								...prev.result.sent,
+								{
+									profile_img: addedUsers.profile_img,
+									other_user_id: addedUsers?.id,
+									user_name: addedUsers.user_name,
+								} as friendsResponseSql,
+							],
+						},
+					};
+				});
 			}
 		} catch (error: any) {
 			console.error(
@@ -153,40 +84,50 @@ export default function Friends() {
 		}
 	};
 
-	const acceptRequest = async (friendId: number) => {
+	const blockFriendF = async (friendId: number) => {
 		try {
-			const response = await api.post("api/friends/accept", { friendId });
+			const response = await api.post("api/friends/block", { friendId });
 
 			if (response.status === 200) {
 				setFriends((prev) => {
-					const acceptedUser = prev.result.received.find(
-						(u) => u.other_user_id === friendId
-					);
+					const blockedUser = foundUsers.filter(
+						(element) => element.id == friendId
+					)[0];
 
-					if (!acceptedUser) return prev;
+					if (user?.user_id) {
+						blockedUser.requester_id = user?.user_id;
+						blockedUser.other_user_id = friendId;
+						blockedUser.status = "blocked";
+						blockedUser.addressee_id = friendId;
+					}
 
 					return {
 						...prev,
 						result: {
 							...prev.result,
+							friends: prev.result.friends.filter(
+								(u) => u.other_user_id !== friendId
+							),
+							sent: prev.result.sent.filter(
+								(u) => u.other_user_id !== friendId
+							),
 							received: prev.result.received.filter(
 								(u) => u.other_user_id !== friendId
 							),
-							friends: [...prev.result.friends, acceptedUser],
+							blocked: [
+								...prev.result.blocked,
+								blockedUser as friendsResponseSql,
+							],
 						},
 					};
 				});
 			}
 		} catch (error: any) {
 			console.error(
-				"Erro ao aceitar:",
+				"Erro ao bloquear:",
 				error?.response?.data || error.message
 			);
 		}
-	};
-
-	const unblockFriend = async (friendId: number) => {
-		console.log("unblock amigo");
 	};
 
 	useEffect(() => {
@@ -267,7 +208,7 @@ export default function Friends() {
 					} else if (isFriend) {
 						props.push({
 							option: "Bloquear",
-							action: blockFriend,
+							action: blockFriendF,
 						});
 						props.push({
 							option: "Remover",
@@ -281,7 +222,7 @@ export default function Friends() {
 
 						props.push({
 							option: "Bloquear",
-							action: blockFriend,
+							action: blockFriendF,
 						});
 					} else if (isRecieved) {
 						props.push({
@@ -291,7 +232,7 @@ export default function Friends() {
 
 						props.push({
 							option: "Bloquear",
-							action: blockFriend,
+							action: blockFriendF,
 						});
 
 						props.push({
@@ -308,7 +249,7 @@ export default function Friends() {
 
 						props.push({
 							option: "Bloquear",
-							action: blockFriend,
+							action: blockFriendF,
 						});
 					}
 
@@ -378,12 +319,16 @@ export default function Friends() {
 					/>
 
 					<FriendsCard
-						key={"blocked users"}
+						key={"blockedusers2"}
 						type="Usuarios bloqueados"
 						friendType={Friends.result.blocked}
 						dropDownProps={[
 							{
-								option: "desbloquear",
+								option: "Desbloquear",
+								action: unblockFriend,
+							},
+							{
+								option: "Remover",
 								action: unblockFriend,
 							},
 						]}

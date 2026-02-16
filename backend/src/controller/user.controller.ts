@@ -1,17 +1,19 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { getUsersByName } from "../models/user.model";
+import { AuthRequest } from "../types";
 export default class user {
-	static async searchName(req: Request, res: Response) {
+	static async searchName(req: AuthRequest, res: Response) {
 		const { name } = req.query;
 
 		if (typeof name !== "string")
 			return res.status(400).json({ message: "Invalid params" });
 
-		const response = await getUsersByName(name);
+		let response = await getUsersByName(name);
 
 		if (!response)
 			return res.status(200).json({ message: "No user found." });
 
+		response = response.filter((element) => element.id != req.user?.id);
 		res.status(200).json({
 			message: "sucess",
 			users: response.map((element) => {

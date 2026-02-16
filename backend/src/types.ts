@@ -81,3 +81,10 @@ export type RelationType =
 	| "received"
 	| "blocked"
 	| "blocked_by";
+	
+	import WebSocket from "ws";
+
+export interface AuthenticatedSocket extends WebSocket {
+  userId?: number;
+  socketId?: string;
+}

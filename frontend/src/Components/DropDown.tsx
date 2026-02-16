@@ -5,22 +5,30 @@ interface DropValue {
 
 interface DropDownProps {
 	values: DropValue[];
-	friendId: number
+	friendId: number;
 }
 
 export default function DropDown({ values, friendId }: DropDownProps) {
 	return (
 		<div className="drop-down h-8 relative text-[12px] aspect-square">
-			{values.length > 1 ? (
-				<div className="absolute options z-10 rounded-2xl overflow-hidden bg-white flex flex-col justify-start items-start font-semibold gap-0.5 p-1 border-2 border-gray-200 bottom-4 right-3">
+			{values.length > 0 ? (
+				<div className="absolute options z-10 rounded-xl overflow-hidden bg-white flex flex-col justify-start items-start font-semibold gap-0.5 p-1 border-2 border-gray-200 bottom-4 right-0">
 					{values.map((element, index) => {
 						return (
 							<button
 								key={`${element} . ${index}`}
-								className={`transition-colors w-full text-start bg-white hover:bg-gray-200 cursor-pointer py-2 p-8 
-                        ${index === 0 ? "rounded-t-xl" : ""} 
+								className={`transition-colors w-full text-start border border-gray-100 hover:bg-gray-200 cursor-pointer py-2 pl-3 p-9 ${
+									element.option == "Cancelar"
+										? "bg-red-100 hover:bg-red-200"
+										: ""
+								}
+								 ${element.option == "Adicionar" ? "bg-green-100 hover:bg-green-200" : ""}
+								  ${element.option == "Bloquear" ? "bg-yellow-50 hover:bg-yellow-100" : ""}
+								  ${element.option == "Desbloquear" ? "bg-red-50 hover:bg-red-100" : ""}
+								  ${element.option == "Remover" ? "bg-yellow-50 hover:bg-yellow-100" : ""}
+                        ${index === 0 ? "rounded-t-lg" : ""} 
 
-                        ${index === values.length - 1 ? "rounded-b-xl" : ""}
+                        ${index === values.length - 1 ? "rounded-b-lg" : ""}
                         `}
 								onClick={() => element.action(friendId)}>
 								{element.option}

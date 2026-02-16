@@ -1,11 +1,5 @@
 import DropDown from "./DropDown";
-interface User {
-	id: number;
-	phone_number: string;
-	user_name: string;
-	email_address: string;
-	profile_img: number;
-}
+import type { friendsResponseSql } from "../types";
 
 export default function SearchCard({
 	type,
@@ -13,7 +7,7 @@ export default function SearchCard({
 	dropDownProps,
 }: {
 	type: string;
-	friendType: User;
+	friendType: friendsResponseSql;
 	dropDownProps: {
 		option: string;
 		action:

@@ -2,10 +2,7 @@ import WebSocket, { RawData } from "ws";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { onlineUsers } from "../state/onLineUsers";
 
-export interface AuthenticatedSocket extends WebSocket {
-	userId?: number;
-	socketId?: string;
-}
+import type {AuthenticatedSocket} from "../types"
 
 type UserId = number;
 
@@ -26,7 +23,7 @@ export async function handleWebSocketConnection(
 	ws: AuthenticatedSocket,
 	req: any
 ) {
-    console.log("novo user connectado")
+	console.log("novo user connectado");
 	const baseUrl = "http://localhost";
 	const url = new URL(req.url || "", baseUrl);
 	const token = url.searchParams.get("token");
@@ -71,7 +68,7 @@ export async function handleWebSocketConnection(
 
 	// Armazena conexão
 	sockets.set(userId, ws);
-	onlineUsers.add(userId, socketId);
+	onlineUsers.add(userId, ws);
 
 	ws.on("message", async (message: RawData) => {
 		try {

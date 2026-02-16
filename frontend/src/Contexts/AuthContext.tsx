@@ -15,9 +15,8 @@ import type { User } from "../types";
 interface AuthContextType {
 	user: User | null;
 	loading: boolean;
-	logout: () => Promise<void>;
 	logged: boolean;
-	accessTokenRef:  React.RefObject<string | null>
+	accessTokenRef: React.RefObject<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,19 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const setAccessToken = useCallback((token: string | null) => {
 		accessTokenRef.current = token;
 	}, []);
-
-	const logout = useCallback(async () => {
-		try {
-			await api.post("/api/auth/logout");
-		} catch (error) {
-			console.error("Erro ao fazer logout:", error);
-		} finally {
-			setAccessToken(null);
-			setUser(null);
-			refreshPromiseRef.current = null;
-			isRefreshingRef.current = false;
-		}
-	}, [setAccessToken, setUser]);
 
 	// Função centralizada de refresh que evita chamadas duplicadas
 	const refreshAccessToken = useCallback(async () => {
@@ -65,7 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				setUser(user);
 
 				const message = res.data.message as string;
-
 				if (
 					!window.location.pathname.includes("login") &&
 					message.includes("login")
@@ -75,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				} else if (res.status === 200) {
 					setLogged(true);
 				}
+
 				return { access_token, user };
 			} catch (error) {
 				setAccessToken(null);
@@ -128,7 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 						return api(originalRequest);
 					} catch (refreshError) {
 						// Se o refresh falhar, faz logout
-						await logout();
 						return Promise.reject(refreshError);
 					}
 				}
@@ -140,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		return () => {
 			api.interceptors.response.eject(responseInterceptor);
 		};
-	}, [refreshAccessToken, logout]);
+	}, [refreshAccessToken]);
 
 	/* ========= AUTO REFRESH AO INICIAR ========= */
 	useEffect(() => {
@@ -175,9 +160,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			value={{
 				user,
 				loading,
-				logout,
 				logged,
-				accessTokenRef
+				accessTokenRef,
 			}}>
 			{children}
 		</AuthContext.Provider>

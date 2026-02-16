@@ -30,3 +30,14 @@ export type RelationType =
 	| "received"
 	| "blocked"
 	| "blocked_by";
+
+export interface friendsReq {
+	message: string;
+	result: {
+		friends: friendsResponseSql[];
+		sent: friendsResponseSql[];
+		received: friendsResponseSql[];
+		blocked: friendsResponseSql[];
+		blocked_by: friendsResponseSql[];
+	};
+}
