@@ -5,7 +5,7 @@ import { hashPassword } from "../utils/auth";
 import { ResultSetHeader, FieldPacket } from "mysql2";
 import { pool } from "../configs/db.config";
 export interface User {
-	id?: number;
+	id: number;
 	user_name?: string;
 	email_address?: string;
 	password_hash?: string;

@@ -19,7 +19,6 @@ export default class FriendsController {
 		if (!user_id)
 			return res.status(400).json({ message: "Erro na autenticacao..." });
 
-		const onlineusers = onlineUsers.getAll();
 		const result: Record<RelationType, friendsResponseSql[]> = {
 			friends: [],
 			sent: [],
@@ -39,8 +38,9 @@ export default class FriendsController {
 					element.requester_id != req.user?.id
 				)
 		);
+
 		response.forEach((element) => {
-			element.online = onlineusers.includes(element.other_user_id);
+			element.online = onlineUsers.isOnline(element.other_user_id);
 			result[element.relation_type].push(element);
 		});
 

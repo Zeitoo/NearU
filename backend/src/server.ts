@@ -15,7 +15,4 @@ export default function startServer() {
 		console.error("Erro no servidor:", error);
 	});
 
-	setInterval(() => {
-		console.log(onlineUsers.getAll());
-	}, 2000);
 }

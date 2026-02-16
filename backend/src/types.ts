@@ -87,4 +87,5 @@ export type RelationType =
 export interface AuthenticatedSocket extends WebSocket {
   userId?: number;
   socketId?: string;
+  token?: string
 }

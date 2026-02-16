@@ -2,12 +2,9 @@ import WebSocket, { RawData } from "ws";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { onlineUsers } from "../state/onLineUsers";
 
-import type {AuthenticatedSocket} from "../types"
+import type { AuthenticatedSocket } from "../types";
 
 type UserId = number;
-
-// Armazena sockets ativos por userId
-const sockets = new Map<UserId, AuthenticatedSocket>();
 
 // Rate limiting por usuário
 const rateLimits = new Map<UserId, { count: number; lastReset: number }>();
@@ -48,12 +45,13 @@ export async function handleWebSocketConnection(
 
 		userId = data.id;
 		ws.userId = userId;
+		ws.token = token;
 	} catch (err) {
 		if (err instanceof TokenExpiredError) {
-			console.error("Token expirado");
+			console.log("Token expirado");
 		}
 		if (err instanceof JsonWebTokenError) {
-			console.error("Token inválido");
+			console.log("Token inválido");
 		}
 		ws.close();
 		return;
@@ -62,12 +60,7 @@ export async function handleWebSocketConnection(
 	ws.on("open", () => {
 		console.log("Novo user connectado.");
 	});
-	// Gera um socketId simples
-	const socketId = crypto.randomUUID();
-	ws.socketId = socketId;
 
-	// Armazena conexão
-	sockets.set(userId, ws);
 	onlineUsers.add(userId, ws);
 
 	ws.on("message", async (message: RawData) => {
@@ -94,16 +87,7 @@ export async function handleWebSocketConnection(
 			}
 
 			const data = JSON.parse(message.toString());
-
-			// exemplo simples de broadcast
-			if (data.type === "PING") {
-				ws.send(
-					JSON.stringify({
-						type: "PONG",
-						timestamp: Date.now(),
-					})
-				);
-			}
+			console.log(data);
 		} catch (error) {
 			console.error("Erro ao processar mensagem:", error);
 		}
@@ -111,7 +95,6 @@ export async function handleWebSocketConnection(
 
 	ws.on("close", () => {
 		if (ws.userId) {
-			sockets.delete(ws.userId);
 			onlineUsers.removeByUser(ws.userId);
 			rateLimits.delete(ws.userId);
 		}
@@ -121,7 +104,6 @@ export async function handleWebSocketConnection(
 		console.error(`Erro no WebSocket do usuário ${userId}:`, error);
 
 		if (ws.userId) {
-			sockets.delete(ws.userId);
 			onlineUsers.removeByUser(ws.userId);
 			rateLimits.delete(ws.userId);
 		}
@@ -132,9 +114,26 @@ export async function handleWebSocketConnection(
 setInterval(() => {
 	const now = Date.now();
 
-	for (const [userId, socket] of sockets) {
+	for (const [userId, socket] of onlineUsers.getAll()) {
+		const token = socket.token;
+
+		if (!token) return socket.close();
+		if (!process.env.AUTHORIZATION_SECRET) return socket.close();
+
+		try {
+			const data = jwt.verify(
+				token,
+				process.env.AUTHORIZATION_SECRET
+			) as JwtPayloadWithId;
+
+			if (!data?.id) {
+				socket.close();
+			}
+		} catch (err) {
+			return socket.close();
+		}
+
 		if (socket.readyState === WebSocket.CLOSED) {
-			sockets.delete(userId);
 			onlineUsers.removeByUser(userId);
 			rateLimits.delete(userId);
 		}
@@ -145,4 +144,4 @@ setInterval(() => {
 			rateLimits.delete(userId);
 		}
 	}
-}, 5 * 60 * 1000);
+}, 35 * 60 * 1000);

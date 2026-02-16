@@ -75,13 +75,15 @@ export default class auth {
 		if (!refresh_token)
 			return res
 				.status(200)
-				.json({ message: "Refresh token não fornecido. Por favor fazer login" });
+				.json({
+					message:
+						"Refresh token não fornecido. Por favor fazer login",
+				});
 
 		const response = await getRefreshToken(refresh_token);
 
 		if (!response) {
-			//onproduction change
-
+			console.log(response);
 			res.status(200).json({ message: "Refresh token inválido." });
 
 			return;

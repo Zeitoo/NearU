@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { getUsersByName } from "../models/user.model";
 import { AuthRequest } from "../types";
+import { onlineUsers } from "../state/onLineUsers";
 export default class user {
 	static async searchName(req: AuthRequest, res: Response) {
 		const { name } = req.query;
@@ -21,6 +22,7 @@ export default class user {
 					user_name: element.user_name,
 					profile_img: element.profile_img,
 					id: element.id,
+					online: onlineUsers.isOnline(element.id),
 				};
 			}),
 		});

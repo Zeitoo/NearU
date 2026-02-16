@@ -46,11 +46,6 @@ input:focus {
 	}
 }
 
-.friends-h {
-	color: rgb(11, 139, 224);
-	height: 250px;
-}
-
 #root:has(.sign) footer {
 	display: none;
 }
@@ -73,3 +68,9 @@ footer li:has(.active) {
 	pointer-events: all;
 	user-select: none;
 }
+
+.leaflet-control-attribution.leaflet-control {
+	display: none !important;
+}
+
+

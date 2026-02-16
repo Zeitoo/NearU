@@ -12,14 +12,14 @@ type WebSocketStatus = "CONNECTING" | "OPEN" | "CLOSED" | "ERROR";
 
 interface WebSocketContextType {
 	sendMessage: (data: string | object) => void;
-	lastMessage: MessageEvent | null;
 	status: WebSocketStatus;
+	friendsCounter: number;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
 	undefined
 );
-
+import type { socketMsg } from "../types";
 interface WebSocketProviderProps {
 	url: string;
 	children: ReactNode;
@@ -30,8 +30,8 @@ export const WebSocketProvider = ({
 	children,
 }: WebSocketProviderProps) => {
 	const socketRef = useRef<WebSocket | null>(null);
-	const [lastMessage, setLastMessage] = useState<MessageEvent | null>(null);
 	const [status, setStatus] = useState<WebSocketStatus>("CONNECTING");
+	const [friendsCounter, setFriendsCounter] = useState<number>(0);
 
 	useEffect(() => {
 		const socket = new WebSocket(url);
@@ -39,13 +39,15 @@ export const WebSocketProvider = ({
 
 		socket.onopen = () => {
 			setStatus("OPEN");
-			setInterval(() => {
-				socket.send(JSON.stringify({ message: "hi my niggaaa." }));
-			}, 2000);
 		};
 
 		socket.onmessage = (event) => {
-			setLastMessage(event);
+			const data = JSON.parse(event.data) as socketMsg;
+
+			if (data.type.toLowerCase().includes("friend")) {
+				setFriendsCounter((prev) => prev + 1);
+			}
+
 		};
 
 		socket.onerror = () => {
@@ -79,8 +81,8 @@ export const WebSocketProvider = ({
 		<WebSocketContext.Provider
 			value={{
 				sendMessage,
-				lastMessage,
 				status,
+				friendsCounter
 			}}>
 			{children}
 		</WebSocketContext.Provider>

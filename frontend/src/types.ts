@@ -41,3 +41,13 @@ export interface friendsReq {
 		blocked_by: friendsResponseSql[];
 	};
 }
+
+export interface socketMsg {
+	type: string;
+	payload: any;
+}
+
+export interface outletContextType {
+	Friends: friendsReq;
+	setFriends: React.Dispatch<React.SetStateAction<friendsReq>>;
+}

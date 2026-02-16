@@ -21,8 +21,9 @@ class OnlineUsersStore {
 	}
 
 	getAll() {
-		return [...this.online.keys()];
+		return [...this.online.entries()];
 	}
+
 }
 
 export const onlineUsers = new OnlineUsersStore();

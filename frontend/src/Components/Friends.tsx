@@ -2,25 +2,21 @@ import { useState, useEffect } from "react";
 import { api } from "../auth/auth";
 import FriendsCard from "./FriendsCard";
 import SearchCard from "./SearchCard";
-import type { friendsReq, friendsResponseSql } from "../types";
+import type {
+	friendsReq,
+	friendsResponseSql,
+	outletContextType,
+} from "../types";
 import useFriend from "../hooks/useFriend";
 import { useUser } from "../hooks/useUser";
-
-const intialFriends = {
-	message: "",
-	result: {
-		friends: [],
-		sent: [],
-		received: [],
-		blocked: [],
-		blocked_by: [],
-	},
-};
+import { useWebSocket } from "../websocket/WebSocketContext";
+import { useOutletContext } from "react-router-dom";
 
 export default function Friends() {
 	const [value, setValue] = useState<string>("");
-	const [Friends, setFriends] = useState<friendsReq>(intialFriends);
 	const [foundUsers, setFoundUsers] = useState<friendsResponseSql[]>([]);
+	const { friendsCounter } = useWebSocket();
+	const { Friends, setFriends } = useOutletContext<outletContextType>();
 
 	const { acceptRequest, blockFriend, removeFriend, unblockFriend } =
 		useFriend(setFriends);
@@ -131,15 +127,15 @@ export default function Friends() {
 	};
 
 	useEffect(() => {
+		fetchFriends();
+	}, [friendsCounter]);
+
+	useEffect(() => {
 		fetchUsers();
 	}, [value]);
 
-	useEffect(() => {
-		fetchFriends();
-	}, []);
-
 	return (
-		<div className="pb-20">
+		<div className="pb-20 friends">
 			<header className="flex justify-between border-b-gray-300 border-b p-3 px-4 items-center">
 				<h1 className="text-2xl text-indigo-500 font-semibold">
 					Friends
@@ -163,177 +159,187 @@ export default function Friends() {
 					border-gray-400 text-gray-700 w-full p-2 py-5 h-5 text-[12px] pl-4 rounded-lg`}
 					/>
 
-					<div className="absolute text-gray-700 top-1/2 right-2.5 -translate-y-1/2">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							strokeWidth={2.5}
-							stroke="currentColor"
-							className="size-5">
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-							/>
-						</svg>
+					<div className="absolute flex items-center text-gray-700 top-1/2 right-2.5 -translate-y-1/2">
+						{value.length > 0 ? (
+							<button
+								onClick={() => setValue("")}
+								className="scale-100 hover:scale-75 transition-all">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.8}
+									stroke="currentColor"
+									className="size-6">
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M6 18 18 6M6 6l12 12"
+									/>
+								</svg>
+							</button>
+						) : (
+							""
+						)}
 					</div>
 				</div>
 			</div>
 
 			{value.length > 0 ? (
-				foundUsers.map((element, index) => {
-					const props = [];
-					const isBlocked = Friends.result.blocked.some(
-						(friend) => friend.other_user_id == element.id
-					);
-					const isFriend = Friends.result.friends.some(
-						(friend) => friend.other_user_id == element.id
-					);
-					const isSent = Friends.result.sent.some(
-						(friend) => friend.other_user_id == element.id
-					);
-					const isRecieved = Friends.result.received.some(
-						(friend) => friend.other_user_id == element.id
-					);
-					const isBlocking = Friends.result.blocked_by.some(
-						(friend) => friend.other_user_id == element.id
-					);
+				<div className="appear-2">
+					{foundUsers.map((element, index) => {
+						const props = [];
+						const isBlocked = Friends.result.blocked.some(
+							(friend) => friend.other_user_id == element.id
+						);
+						const isFriend = Friends.result.friends.some(
+							(friend) => friend.other_user_id == element.id
+						);
+						const isSent = Friends.result.sent.some(
+							(friend) => friend.other_user_id == element.id
+						);
+						const isRecieved = Friends.result.received.some(
+							(friend) => friend.other_user_id == element.id
+						);
+						const isBlocking = Friends.result.blocked_by.some(
+							(friend) => friend.other_user_id == element.id
+						);
 
-					if (isBlocked) {
-						props.push({
-							option: "Desbloquear",
-							action: unblockFriend,
-						});
-					} else if (isFriend) {
-						props.push({
-							option: "Bloquear",
-							action: blockFriendF,
-						});
-						props.push({
-							option: "Remover",
-							action: removeFriend,
-						});
-					} else if (isSent) {
-						props.push({
-							option: "Cancelar",
-							action: removeFriend,
-						});
+						if (isBlocked) {
+							props.push({
+								option: "Desbloquear",
+								action: unblockFriend,
+							});
+						} else if (isFriend) {
+							props.push({
+								option: "Bloquear",
+								action: blockFriendF,
+							});
+							props.push({
+								option: "Remover",
+								action: removeFriend,
+							});
+						} else if (isSent) {
+							props.push({
+								option: "Cancelar",
+								action: removeFriend,
+							});
 
-						props.push({
-							option: "Bloquear",
-							action: blockFriendF,
-						});
-					} else if (isRecieved) {
-						props.push({
-							option: "Remover",
-							action: removeFriend,
-						});
+							props.push({
+								option: "Bloquear",
+								action: blockFriendF,
+							});
+						} else if (isRecieved) {
+							props.push({
+								option: "Remover",
+								action: removeFriend,
+							});
 
-						props.push({
-							option: "Bloquear",
-							action: blockFriendF,
-						});
+							props.push({
+								option: "Bloquear",
+								action: blockFriendF,
+							});
 
-						props.push({
-							option: "Aceitar",
-							action: acceptRequest,
-						});
-					} else if (isBlocking) {
-						("");
-					} else {
-						props.push({
-							option: "Adicionar",
-							action: addRequest,
-						});
+							props.push({
+								option: "Aceitar",
+								action: acceptRequest,
+							});
+						} else if (isBlocking) {
+							("");
+						} else {
+							props.push({
+								option: "Adicionar",
+								action: addRequest,
+							});
 
-						props.push({
-							option: "Bloquear",
-							action: blockFriendF,
-						});
-					}
+							props.push({
+								option: "Bloquear",
+								action: blockFriendF,
+							});
+						}
 
-					return (
-						<>
+						return (
 							<SearchCard
 								key={`${element.user_name} + ${index}`}
 								type="Amigos"
 								friendType={element}
 								dropDownProps={props}
 							/>
-						</>
-					);
-				})
+						);
+					})}
+				</div>
 			) : (
-				<>
-					<FriendsCard
-						key={"amigos1"}
-						type="Amigos"
-						friendType={Friends.result.friends}
-						dropDownProps={[
-							{
-								option: "Remover",
-								action: removeFriend,
-							},
-							{
-								option: "Bloquear",
-								action: blockFriend,
-							},
-						]}
-					/>
+				<div className="appear">
+					<>
+						<FriendsCard
+							key={"amigos1"}
+							type="Amigos"
+							friendType={Friends.result.friends}
+							dropDownProps={[
+								{
+									option: "Remover",
+									action: removeFriend,
+								},
+								{
+									option: "Bloquear",
+									action: blockFriend,
+								},
+							]}
+						/>
 
-					<FriendsCard
-						key={"pedidos1"}
-						type="Pedidos recebidos"
-						friendType={Friends.result.received}
-						dropDownProps={[
-							{
-								option: "Remover",
-								action: removeFriend,
-							},
-							{
-								option: "Bloquear",
-								action: blockFriend,
-							},
-							{
-								option: "Aceitar",
-								action: acceptRequest,
-							},
-						]}
-					/>
+						<FriendsCard
+							key={"pedidos1"}
+							type="Pedidos recebidos"
+							friendType={Friends.result.received}
+							dropDownProps={[
+								{
+									option: "Remover",
+									action: removeFriend,
+								},
+								{
+									option: "Bloquear",
+									action: blockFriend,
+								},
+								{
+									option: "Aceitar",
+									action: acceptRequest,
+								},
+							]}
+						/>
 
-					<FriendsCard
-						key={"pedidos2"}
-						type="Pedidos enviados"
-						friendType={Friends.result.sent}
-						dropDownProps={[
-							{
-								option: "Cancelar",
-								action: removeFriend,
-							},
-							{
-								option: "Bloquear",
-								action: blockFriend,
-							},
-						]}
-					/>
+						<FriendsCard
+							key={"pedidos2"}
+							type="Pedidos enviados"
+							friendType={Friends.result.sent}
+							dropDownProps={[
+								{
+									option: "Cancelar",
+									action: removeFriend,
+								},
+								{
+									option: "Bloquear",
+									action: blockFriend,
+								},
+							]}
+						/>
 
-					<FriendsCard
-						key={"blockedusers2"}
-						type="Usuarios bloqueados"
-						friendType={Friends.result.blocked}
-						dropDownProps={[
-							{
-								option: "Desbloquear",
-								action: unblockFriend,
-							},
-							{
-								option: "Remover",
-								action: unblockFriend,
-							},
-						]}
-					/>
-				</>
+						<FriendsCard
+							key={"blockedusers2"}
+							type="Usuarios bloqueados"
+							friendType={Friends.result.blocked}
+							dropDownProps={[
+								{
+									option: "Desbloquear",
+									action: unblockFriend,
+								},
+								{
+									option: "Remover",
+									action: unblockFriend,
+								},
+							]}
+						/>
+					</>
+				</div>
 			)}
 		</div>
 	);

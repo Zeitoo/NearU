@@ -19,11 +19,17 @@ export default function SearchCard({
 		<>
 			<div className="px-4">
 				<div className="min-h-2 bg-blue-50 hover:bg-blue-100 gap-1 transition-all my-3 flex items-center p-3 py-6 rounded-lg cursor-pointer">
-					<div className="flex active-avatar overflow-hidden rounded-full items-center">
+					<div className="flex active-avatar relative  rounded-full items-center">
 						<img
 							src={`/Avatars/avatar (${friendType.profile_img}).png`}
-							className="w-14 aspect-square"
+							className="w-14 aspect-square rounded-full "
 						/>
+
+						{friendType.online ? (
+							<div className="w-3  absolute right-0.5 bottom-0.5 aspect-square bg-green-500 rounded-full"></div>
+						) : (
+							""
+						)}
 					</div>
 
 					<div className="flex-1 w-full ml-1 font-semibold text-gray-600 items-center flex text-[12px]">
