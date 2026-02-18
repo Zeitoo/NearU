@@ -119,7 +119,6 @@ input[type="checkbox"].switch:checked::before {
 	--_g: no-repeat radial-gradient(circle closest-side, #006eff 90%, #0000);
 }
 
-
 .loader-white {
 	--_g: no-repeat radial-gradient(circle closest-side, #ffffff 90%, #0000);
 }
@@ -172,4 +171,19 @@ input[type="checkbox"].switch:checked::before {
 .modal {
 	background-color: rgba(255, 255, 255, 0.123);
 	backdrop-filter: blur(3px);
+}
+
+/* Chrome, Edge, Safari */
+.scroll-none::-webkit-scrollbar {
+	display: none;
+}
+
+/* Firefox */
+.scroll-none {
+	scrollbar-width: none;
+}
+
+/* Internet Explorer */
+.scroll-none {
+	-ms-overflow-style: none;
 }

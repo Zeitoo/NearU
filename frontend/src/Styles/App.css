@@ -73,4 +73,50 @@ footer li:has(.active) {
 	display: none !important;
 }
 
+.friends-selector > div {
+	opacity: 0;
+	transition: all 0.4s ease-in-out;
+}
 
+.friendExpanded > div {
+	opacity: 1;
+}
+
+.avatar-marker {
+	border-radius: 50%;
+	border: 3px solid white;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	transition: transform 0.2s ease;
+}
+
+/* Piscar para quem está online */
+.avatar-marker.online {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+	}
+
+	70% {
+		box-shadow: 0 0 0 19px rgba(34, 197, 94, 0);
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+	}
+}
+
+.leaflet-control-container {
+	display: none;
+}
+
+.location-control {
+	height: 0px;
+}
+
+.friendExpanded .location-control {
+	transition: height .3s .4s linear;
+	height: 200px;
+}

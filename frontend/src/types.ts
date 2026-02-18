@@ -4,6 +4,7 @@ export interface User {
 	user_name: string;
 	email_address: string;
 	profile_img: number;
+	online?: boolean;
 }
 
 export interface friendsResponseSql {
@@ -50,4 +51,19 @@ export interface socketMsg {
 export interface outletContextType {
 	Friends: friendsReq;
 	setFriends: React.Dispatch<React.SetStateAction<friendsReq>>;
+	startTracking: () => void;
+	stopTracking: () => void;
+	locations: locations[] | null;
+	myLocation: LocationState | null;
+}
+
+export type LocationState = {
+	latitude: number;
+	longitude: number;
+	accuracy: number;
+};
+
+export interface locations {
+	user: User;
+	location: LocationState;
 }

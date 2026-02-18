@@ -23,7 +23,8 @@ class OnlineUsersStore {
 	getAll() {
 		return [...this.online.entries()];
 	}
-
 }
 
 export const onlineUsers = new OnlineUsersStore();
+export const permissions = new Map<number, Set<number>>();
+// owner_id -> Set<viewer_id>

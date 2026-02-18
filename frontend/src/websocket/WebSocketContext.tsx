@@ -19,19 +19,27 @@ interface WebSocketContextType {
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
 	undefined
 );
-import type { socketMsg } from "../types";
+import type { socketMsg, locations, LocationState } from "../types";
+import { useUser } from "../hooks/useUser";
 interface WebSocketProviderProps {
 	url: string;
 	children: ReactNode;
+	locations: locations[] | null;
+	setLocations: React.Dispatch<React.SetStateAction<locations[] | null>>;
+	myLocation: LocationState | null;
+	isSharing: boolean;
 }
 
 export const WebSocketProvider = ({
 	url,
 	children,
+	myLocation,
+	isSharing,
 }: WebSocketProviderProps) => {
 	const socketRef = useRef<WebSocket | null>(null);
 	const [status, setStatus] = useState<WebSocketStatus>("CONNECTING");
 	const [friendsCounter, setFriendsCounter] = useState<number>(0);
+	const { user } = useUser();
 
 	useEffect(() => {
 		const socket = new WebSocket(url);
@@ -47,7 +55,8 @@ export const WebSocketProvider = ({
 			if (data.type.toLowerCase().includes("friend")) {
 				setFriendsCounter((prev) => prev + 1);
 			}
-
+			if (data.type.toLocaleLowerCase().includes("location")) {
+			}
 		};
 
 		socket.onerror = () => {
@@ -62,6 +71,20 @@ export const WebSocketProvider = ({
 			socket.close();
 		};
 	}, [url]);
+
+	useEffect(() => {
+		if (status != "OPEN" || !socketRef.current) return;
+
+		socketRef.current.send(
+			JSON.stringify({
+				type: "LOCATION-UPDATE",
+				payload: {
+					location: myLocation,
+					user_id: user,
+				},
+			})
+		);
+	}, [myLocation, status]);
 
 	const sendMessage = useCallback((data: string | object) => {
 		if (
@@ -82,7 +105,7 @@ export const WebSocketProvider = ({
 			value={{
 				sendMessage,
 				status,
-				friendsCounter
+				friendsCounter,
 			}}>
 			{children}
 		</WebSocketContext.Provider>

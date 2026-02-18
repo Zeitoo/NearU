@@ -2,15 +2,14 @@ import { useState } from "react";
 
 import { api } from "../auth/auth";
 import type { outletContextType } from "../types";
-import { useUser } from "../hooks/useUser";
-import { useWebSocket } from "../websocket/WebSocketContext";
 import { useOutletContext } from "react-router-dom";
 import MapComponent from "./MapComponent";
-
+import  LocationControl  from "./LocationControl";
 export default function Map() {
 	const [friendsExpanded, setFriendsExpanded] = useState(false);
 
-	const { Friends, setFriends } = useOutletContext<outletContextType>();
+	const { startTracking, locations, myLocation,Friends } =
+		useOutletContext<outletContextType>();
 
 	const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
@@ -56,12 +55,15 @@ export default function Map() {
 					isMobile ? "h-dvh " : "h-screen "
 				}flex-col`}>
 				<div className="map relative z-0 bg-indigo-500 flex-1">
-					<MapComponent />
+					<MapComponent
+						locations={locations}
+						myLocation={myLocation}
+					/>
 				</div>
 
 				<div
-					className={`friends relative z-30 bg-white ${
-						friendsExpanded ? "h-55" : "h-8"
+					className={`friends-selector relative z-30 bg-white ${
+						friendsExpanded ? "h-60 friendExpanded" : "h-8"
 					} mb-10  rounded-tl-3xl -top-2 rounded-tr-2xl transition-all`}>
 					<button
 						onTouchStart={() => {
@@ -78,8 +80,9 @@ export default function Map() {
 						<div className="bg-gray-300 h-1.5 w-12 rounded-lg"></div>
 					</button>
 
-					<div className="max-h-full border overflow-hidden ">
+					<div className="max-h-full px-3 pb-10 pt-0 ">
 						
+						<LocationControl Friends={Friends} startTracking={startTracking} />
 					</div>
 				</div>
 			</div>
