@@ -12,6 +12,13 @@ interface signUpType {
 	avatar: number;
 }
 
+interface changePassType {
+	actual: string;
+	newPass: string;
+}
+
+import { api } from "../auth/auth";
+
 function useSign() {
 	const host = import.meta.env.VITE_API_URL;
 
@@ -51,9 +58,21 @@ function useSign() {
 		}
 	};
 
+	const changePass = async (data: changePassType) => {
+		try {
+			const response = await api.patch("api/auth/changepass", data);
+
+			const message = response.data;
+			return message;
+		} catch (error: any) {
+			return { message: error.message };
+		}
+	};
+
 	return {
 		signIn,
 		signUp,
+		changePass,
 	};
 }
 export default useSign;

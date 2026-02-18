@@ -16,8 +16,10 @@ export interface friendsResponseSql {
 	user_name: string;
 	profile_img: number;
 	online?: boolean;
+	isAllowed?: boolean;
 	relation_type: RelationType;
 }
+
 export interface friendsResponse {
 	friends: friendsResponseSql[];
 	sent: friendsResponseSql[];

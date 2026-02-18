@@ -20,12 +20,18 @@ export const putFriendship = async (requester: number, addressee: number) => {
 		return { success: false };
 	}
 };
+
 export const blockFriendship = async (
 	authUserId: number,
 	otherUserId: number
 ) => {
+	const connection = await pool.getConnection();
+
 	try {
-		const [result] = await pool.query<ResultSetHeader>(
+		await connection.beginTransaction();
+
+		// Bloquear amizade
+		const [result] = await connection.query<ResultSetHeader>(
 			`
 			INSERT INTO friendships (requester_id, addressee_id, status, blocked_by)
 			VALUES (?, ?, 'blocked', ?)
@@ -37,9 +43,71 @@ export const blockFriendship = async (
 			[authUserId, otherUserId, authUserId, authUserId]
 		);
 
+		// Remover permissões de localização (ambos os lados)
+		await connection.query(
+			`
+			DELETE FROM location_permissions
+			WHERE (owner_id = ? AND viewer_id = ?)
+			   OR (owner_id = ? AND viewer_id = ?)
+			`,
+			[authUserId, otherUserId, otherUserId, authUserId]
+		);
+
+		await connection.commit();
+
 		return result.affectedRows > 0;
 	} catch (error) {
+		await connection.rollback();
 		return false;
+	} finally {
+		connection.release();
+	}
+};
+
+export const removeFriendship = async (
+	authUserId: number,
+	otherUserId: number
+) => {
+	const connection = await pool.getConnection();
+
+	try {
+		await connection.beginTransaction();
+
+		const [result] = await connection.query<ResultSetHeader>(
+			`
+			DELETE FROM friendships
+			WHERE user_low = LEAST(?, ?)
+			  AND user_high = GREATEST(?, ?)
+			`,
+			[authUserId, otherUserId, authUserId, otherUserId]
+		);
+
+		if (result.affectedRows === 0) {
+			await connection.rollback();
+			return {
+				success: false,
+				message: "Friendship not found",
+			};
+		}
+
+		// Apagar permissões de localização
+		await connection.query(
+			`
+			DELETE FROM location_permissions
+			WHERE (owner_id = ? AND viewer_id = ?)
+			   OR (owner_id = ? AND viewer_id = ?)
+			`,
+			[authUserId, otherUserId, otherUserId, authUserId]
+		);
+
+		await connection.commit();
+
+		return { success: true };
+	} catch (error) {
+		await connection.rollback();
+		return { success: false };
+	} finally {
+		connection.release();
 	}
 };
 
@@ -89,31 +157,6 @@ export const rejectFriendship = async (
 		return {
 			success: false,
 			message: "No pending request found",
-		};
-	}
-
-	return { success: true };
-};
-
-export const removeFriendship = async (
-	authUserId: number, // vem do JWT
-	otherUserId: number // vem do body
-) => {
-	const [result] = await pool.query<ResultSetHeader>(
-		`
-		DELETE FROM friendships
-		WHERE user_low = LEAST(?, ?)
-		  AND user_high = GREATEST(?, ?)
-		`,
-		[authUserId, otherUserId, authUserId, otherUserId]
-	);
-
-	console.log("sql response: ", result);
-
-	if (result.affectedRows === 0) {
-		return {
-			success: false,
-			message: "Friendship not found",
 		};
 	}
 

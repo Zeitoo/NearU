@@ -34,6 +34,7 @@ export const WebSocketProvider = ({
 	url,
 	children,
 	myLocation,
+	setLocations,
 	isSharing,
 }: WebSocketProviderProps) => {
 	const socketRef = useRef<WebSocket | null>(null);
@@ -55,7 +56,34 @@ export const WebSocketProvider = ({
 			if (data.type.toLowerCase().includes("friend")) {
 				setFriendsCounter((prev) => prev + 1);
 			}
-			if (data.type.toLocaleLowerCase().includes("location")) {
+
+			if (data.type.toUpperCase() === "LOCATION-UPDATE") {
+				const { location, user: incomingUser } = data.payload;
+
+				setLocations((prevLocations) => {
+					const list = prevLocations ?? [];
+
+					// Verifica se o user já está em locations[]
+					const exists = list.some(
+						(l) => l.user.user_id === incomingUser.user_id
+					);
+
+					if (exists) {
+						// Apenas actualiza a localização
+						return list.map((l) =>
+							l.user.user_id === incomingUser.user_id
+								? { ...l, location }
+								: l
+						);
+					} else {
+						// Adiciona o user com os dados que vieram no payload
+						const newEntry: locations = {
+							user: incomingUser,
+							location,
+						};
+						return [...list, newEntry];
+					}
+				});
 			}
 		};
 
@@ -80,7 +108,7 @@ export const WebSocketProvider = ({
 				type: "LOCATION-UPDATE",
 				payload: {
 					location: myLocation,
-					user_id: user,
+					user: user,
 				},
 			})
 		);

@@ -13,8 +13,8 @@ export default function Logout() {
 							navigate("/login");
 						}
 					})
-					.catch((err) => navigate("/login"));
-			}, 6000);
+					.catch(() => navigate("/login"));
+			}, 2000);
 		} catch (error) {
 			console.log(error);
 		}

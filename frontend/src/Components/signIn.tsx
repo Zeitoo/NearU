@@ -30,9 +30,9 @@ export default function SignIn() {
 		setLoading(true);
 		signIn(data).then((response) => {
 			setLoading(false);
-			console.log(response);
+			console.log("Resposta do sigin:  ", "  /  . ",response.message);
 			if (response.message.includes("sucesso")) {
-				navigate("/");
+				navigate("/map");
 			} else if (response.message === "Invalid credentials") {
 				setError("email", {
 					message: "Email ou palavra-passe inválidos",

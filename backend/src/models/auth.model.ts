@@ -1,8 +1,6 @@
 import { query } from "../utils/auth";
-import type { SignInForm } from "../utils/zodSchemas";
 import type { SignUpForm } from "../utils/zodSchemas";
 import crypto from "crypto";
-import { RowDataPacket } from "mysql2";
 import { hashPassword } from "../utils/auth";
 import { ResultSetHeader, FieldPacket } from "mysql2";
 import { pool } from "../configs/db.config";
@@ -15,20 +13,7 @@ export interface User {
 	[k: string]: any;
 }
 
-export interface RefreshTokenWithUser extends RowDataPacket {
-	refresh_id: number;
-	user_id: number;
-	token_hash: string;
-	revoked: number;
-	refresh_created_at: Date;
-	expires_at: Date;
-	user_name: string;
-	email_address: string;
-	profile_img: number;
-	user_created_at: Date;
-	phone_number: string;
-}
-
+import type { RefreshTokenWithUser } from "../types";
 export const putUser = async (
 	user: SignUpForm
 ): Promise<{ message: string }> => {
@@ -65,6 +50,34 @@ export const getUsersByEmail = async (email: string): Promise<User> => {
 	} catch (error) {
 		console.error("Error in getUsersByEmail:", error);
 		return [];
+	}
+};
+
+export const getUsersById = async (id: number): Promise<User> => {
+	try {
+		const [rows] = await query<User[]>(
+			`SELECT * FROM users WHERE id = ?;`,
+			[id]
+		);
+		return rows;
+	} catch (error) {
+		console.error("Error in getUsersByEmail:", error);
+		return [];
+	}
+};
+
+export const updateUserPass = async (password: string, userId: number) => {
+	const passwordHash = await hashPassword(password);
+	try {
+		const [rows] = await pool.query<ResultSetHeader>(
+			`UPDATE users SET password_hash = ? WHERE id = ?;`,
+			[passwordHash, userId]
+		);
+
+		return rows.affectedRows > 0;
+	} catch (error) {
+		console.error("Error in setpasswords", error);
+		return null;
 	}
 };
 
@@ -157,7 +170,7 @@ export const deleteRefreshToken = async (refreshToken: string) => {
     			SELECT user_id
     			FROM refresh_tokens
     			WHERE token_hash = ?
-    			LIMIT 1
+    			
 				) sub ON rt.user_id = sub.user_id;
 			`,
 			[refreshTokenHash]

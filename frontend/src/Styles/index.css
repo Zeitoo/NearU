@@ -187,3 +187,12 @@ input[type="checkbox"].switch:checked::before {
 .scroll-none {
 	-ms-overflow-style: none;
 }
+
+.dark {
+	pointer-events: none;
+	user-select: none;
+	touch-action: none;
+	
+	z-index: 2000;
+	backdrop-filter: brightness(0.75) invert(1) contrast(1.9) hue-rotate(	80deg);
+}

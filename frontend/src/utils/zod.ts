@@ -39,9 +39,26 @@ export const formsChema = z.object({
 	session: z.coerce.boolean().optional(),
 });
 
+export const passChangeschema = z.object({
+	actual: z
+		.string()
+		.nonempty("Palavra-passe é obrigatória")
+		.min(8, "Muito curta")
+		.max(12, "Muito longa")
+		.regex(/[!@#$%&*?]/, {
+			message: "Deve conter pelo menos um símbolo",
+		}),
+	newPass: z
+		.string()
+		.nonempty("Palavra-passe é obrigatória")
+		.min(8, "Muito curta")
+		.max(12, "Muito longa")
+		.regex(/[!@#$%&*?]/, {
+			message: "Deve conter pelo menos um símbolo",
+		}),
+});
+
+export type passChangeForm = z.infer<typeof passChangeschema>;
 export type SignInForm = z.infer<typeof formsChema>;
 
-export type SignUpForm = z.infer<typeof signupSchema>;	
-
-
-
+export type SignUpForm = z.infer<typeof signupSchema>;

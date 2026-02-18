@@ -2,7 +2,6 @@ import DropDown from "./DropDown";
 import type { friendsResponseSql } from "../types";
 
 export default function SearchCard({
-	type,
 	friendType,
 	dropDownProps,
 }: {

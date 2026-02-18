@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { api } from "../auth/auth";
 import type { outletContextType } from "../types";
 import { useOutletContext } from "react-router-dom";
 import MapComponent from "./MapComponent";

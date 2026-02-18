@@ -11,6 +11,15 @@ import {
 } from "../models/friends.model";
 import { onlineUsers } from "../state/onLineUsers";
 import { notifyUser } from "../utils/notifyUser";
+import { getPermissions } from "../models/location.model";
+
+interface permissionsSql {
+	id: number;
+	owner_id: number;
+	viewer_id: number;
+	is_allowed: number;
+	created_at: string;
+}
 
 export default class FriendsController {
 	// Listar amigos
@@ -27,7 +36,7 @@ export default class FriendsController {
 			blocked_by: [],
 		};
 
-		const response = await getFriends(user_id);
+		let response = await getFriends(user_id);
 
 		if (response.length < 1)
 			return res.status(200).json({ message: "Zero friends", result });
@@ -38,6 +47,18 @@ export default class FriendsController {
 					element.requester_id != req.user?.id
 				)
 		);
+		const permissions = (await getPermissions(user_id)) as permissionsSql[];
+
+		response = response.map((element) => {
+			const isAllowed = permissions.some(
+				(elemento) =>
+					elemento.viewer_id == element.other_user_id &&
+					elemento.is_allowed
+			);
+			element.isAllowed = isAllowed;
+
+			return element;
+		});
 
 		response.forEach((element) => {
 			element.online = onlineUsers.isOnline(element.other_user_id);

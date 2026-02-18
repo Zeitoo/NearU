@@ -1,12 +1,6 @@
 import { Request } from "express";
 import { RowDataPacket } from "mysql2";
 
-interface userJwt {
-	id?: number;
-	userEmail?: string;
-	user_name?: string;
-}
-
 export interface AuthRequest extends Request {
 	user?: {
 		id: number;
@@ -66,6 +60,7 @@ export interface friendsResponseSql {
 	user_name: string;
 	profile_img: number;
 	online?: boolean;
+	isAllowed?: boolean;
 	relation_type: RelationType;
 }
 export interface friendsResponse {
@@ -81,11 +76,26 @@ export type RelationType =
 	| "received"
 	| "blocked"
 	| "blocked_by";
-	
-	import WebSocket from "ws";
+
+import WebSocket from "ws";
 
 export interface AuthenticatedSocket extends WebSocket {
-  userId?: number;
-  socketId?: string;
-  token?: string
+	userId?: number;
+	socketId?: string;
+	token?: string;
+}
+
+export interface webSocketMessage {
+	type: string;
+	payload: {
+		location: {
+			latitude: number;
+			longitude: number;
+			accuracy: number;
+		};
+		user: {
+			user_id: number;
+			user_name: "Tech";
+		};
+	};
 }

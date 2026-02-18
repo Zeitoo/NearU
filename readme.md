@@ -1,0 +1,1 @@
+Ao bloquear user a a partilha deve ser interropida 

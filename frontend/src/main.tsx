@@ -18,8 +18,9 @@ import { AuthProvider } from "./Contexts/AuthContext.tsx";
 import UserProvider from "./Contexts/UserContext.tsx";
 import Logout from "./Components/Logout.tsx";
 import { ProtectedRoute } from "./Components/Protected.tsx";
-
-
+import PasswordReset from "./Components/PasswordReset.tsx";
+import PasswordChange from "./Components/PasswordChange.tsx";
+import NotFound from "./Components/NotFound.tsx";
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route
@@ -40,7 +41,11 @@ const router = createBrowserRouter(
 
 			<Route
 				path="map"
-				element={<Map />}
+				element={
+					<ProtectedRoute>
+						<Map />
+					</ProtectedRoute>
+				}
 			/>
 			<Route
 				path="friends"
@@ -52,7 +57,11 @@ const router = createBrowserRouter(
 			/>
 			<Route
 				path="settings"
-				element={<Settings />}
+				element={
+					<ProtectedRoute>
+						<Settings />
+					</ProtectedRoute>
+				}
 			/>
 			<Route
 				path="logout"
@@ -63,8 +72,16 @@ const router = createBrowserRouter(
 				element={<Logout />}
 			/>
 			<Route
+				path="passwordchange"
+				element={<PasswordChange/>}
+			/>
+			<Route
+				path="passwordreset"
+				element={<PasswordReset/>}
+			/>
+			<Route
 				path="*"
-				element={<div>Pagina nao encontrada</div>}
+				element={<NotFound />}
 			/>
 		</Route>
 	)

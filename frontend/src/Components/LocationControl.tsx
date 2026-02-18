@@ -1,3 +1,4 @@
+import { api } from "../auth/auth";
 import type { friendsReq } from "../types";
 
 const parentClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -14,6 +15,29 @@ export default function LocationControl({
 	startTracking: () => void;
 	Friends: friendsReq;
 }) {
+	const locationHandler = async (
+		e: React.MouseEvent<HTMLInputElement, MouseEvent>,
+		viewerId: number
+	) => {
+		e.stopPropagation();
+
+		const target = e.target as React.DetailedHTMLProps<
+			React.InputHTMLAttributes<HTMLInputElement>,
+			HTMLInputElement
+		>;
+
+		try {
+			const response = await api.patch("api/locations", {
+				viewerId,
+				isAllowed: target.checked,
+			});
+
+			console.log(response);
+		} catch (error) {
+			console.log("deu erro essa poh");
+		}
+	};
+
 	return (
 		<div className="location-control scroll-none overflow-scroll">
 			<div>
@@ -90,12 +114,16 @@ export default function LocationControl({
 
 							<label className="flex items-center cursor-pointer">
 								<input
-									onClick={(e) => {
-										e.stopPropagation();
-									}}
+									defaultChecked={element.isAllowed}
+									onClick={(e) =>
+										locationHandler(
+											e,
+											element.other_user_id
+										)
+									}
 									type="checkbox"
-									id="ghost-mode"
-									name="ghost-mode"
+									id="share-location"
+									name="share-location"
 									className="switch"
 								/>
 							</label>

@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-import { DevTool } from "@hookform/devtools";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "./PhoneInput";
 import useSign from "../hooks/useSign";
@@ -216,7 +215,6 @@ export default function SignUp() {
 						</div>
 					</form>
 
-					<DevTool control={control} />
 				</div>
 			</div>
 		</div>

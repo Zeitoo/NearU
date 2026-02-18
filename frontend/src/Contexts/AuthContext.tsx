@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [loading, setLoading] = useState(true);
 	const accessTokenRef = useRef<string | null>(null);
 	const [logged, setLogged] = useState<boolean>(false);
-	const isRefreshingRef = useRef(false);
 	const refreshPromiseRef = useRef<Promise<any> | null>(null);
 	const hasInitializedRef = useRef(false); // Previne double mount do Strict Mode
 

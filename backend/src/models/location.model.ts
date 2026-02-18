@@ -1,109 +1,93 @@
-import { Response } from "express";
 import { pool } from "../configs/db.config";
-import type { AuthRequest } from "../types";
+import { QueryResult, RowDataPacket } from "mysql2";
 
-export const allowViewer = async (req: AuthRequest, res: Response) => {
-	try {
-		const ownerId = req.user?.id;
-		const { viewerId } = req.body;
-
-		if (!ownerId) {
-			return res.status(401).json({ message: "Não autenticado" });
-		}
-
-		if (!viewerId || typeof viewerId !== "number") {
-			return res.status(400).json({ message: "viewerId inválido" });
-		}
-
-		if (viewerId === ownerId) {
-			return res
-				.status(400)
-				.json({ message: "Não podes permitir a ti mesmo" });
-		}
-
-		await pool.execute(
-			`
-      INSERT INTO location_permissions (owner_id, viewer_id, is_allowed)
-      VALUES (?, ?, 1)
-      ON DUPLICATE KEY UPDATE is_allowed = 1
-      `,
-			[ownerId, viewerId]
-		);
-
-		return res.status(200).json({
-			message: "Permissão concedida com sucesso",
-		});
-	} catch (error: any) {
-		// FK violation (user não existe)
-		if (error.code === "ER_NO_REFERENCED_ROW_2") {
-			return res.status(404).json({
-				message: "Utilizador não encontrado",
-			});
-		}
-
-		console.error(error);
-
-		return res.status(500).json({
-			message: "Erro interno do servidor",
-		});
-	}
-};
-
-export const updateLocationPermission = async (
-	req: AuthRequest,
-	res: Response
+export const putLocationPermission = async (
+	ownerId: number,
+	viewerId: number,
+	isAllowed: boolean
 ) => {
 	try {
-		const ownerId = req.user?.id;
-		const { viewerId, isAllowed } = req.body;
-
-		if (!ownerId) {
-			return res.status(401).json({ message: "Não autenticado" });
-		}
-
-		if (typeof viewerId !== "number" || typeof isAllowed !== "boolean") {
-			return res.status(400).json({
-				message: "viewerId ou isAllowed inválido",
-			});
-		}
-
 		const [result]: any = await pool.execute(
 			`
-      UPDATE location_permissions
-      SET is_allowed = ?
-      WHERE owner_id = ? AND viewer_id = ?
-      `,
-			[isAllowed ? 1 : 0, ownerId, viewerId]
-		);
+			INSERT INTO location_permissions (owner_id, viewer_id, is_allowed)
+			VALUES (?, ?, ?)
+			ON DUPLICATE KEY UPDATE
+			is_allowed = VALUES(is_allowed)`,
 
-		if (result.affectedRows === 0) {
-			return res.status(404).json({
-				message: "Permissão não encontrada",
-			});
+			[ownerId, viewerId, isAllowed ? 1 : 0]
+		);
+		if (result.affectedRows > 0) {
+			return {
+				success: true,
+			};
 		}
 
-		return res.status(200).json({
-			message: "Permissão atualizada com sucesso",
-		});
+		return { success: false };
 	} catch (error) {
-		console.error(error);
-
-		return res.status(500).json({
-			message: "Erro interno do servidor",
-		});
+		return { success: false };
 	}
 };
 
-export const getLocations= async (req: AuthRequest, res: Response) => {
+export interface PermissionRow {
+	owner_id: number;
+	viewer_id: number;
+}
+import { permissions } from "../state/onLineUsers";
+export const loadPermissionsToCache = async (): Promise<
+	Map<number, Set<number>>
+> => {
 	try {
-		const [rows] = await pool.execute(
-			` SELECT * FROM location_permissions WHERE is_allowed = 1;`
+		permissions.clear();
+		const [rows] = await pool.execute<RowDataPacket[] & PermissionRow[]>(
+			`SELECT owner_id, viewer_id FROM location_permissions WHERE is_allowed = 1`
 		);
 
-		console.log(rows);
-		return res.status(200).json(rows);
-	} catch {
-		return res.status(500).json({ message: "Erro interno" });
+		for (const r of rows) {
+			const owner = r.owner_id;
+			const viewer = r.viewer_id;
+
+			if (!permissions.has(owner)) {
+				permissions.set(owner, new Set());
+			}
+			permissions.get(owner)!.add(viewer);
+		}
+
+		return permissions;
+	} catch (err) {
+		console.error("Erro ao carregar permissions:", err);
+		throw err;
 	}
 };
 
+export const addPermissionToCache = (ownerId: number, viewerId: number) => {
+	if (!permissions.has(ownerId)) permissions.set(ownerId, new Set());
+	permissions.get(ownerId)!.add(viewerId);
+};
+
+export const removePermissionFromCache = (
+	ownerId: number,
+	viewerId: number
+) => {
+	const s = permissions.get(ownerId);
+	if (!s) return;
+	s.delete(viewerId);
+	if (s.size === 0) permissions.delete(ownerId);
+};
+ 
+export const getPermissions = async (ownerId: number):Promise<unknown> => {
+	try {
+		const [rows]= await pool.query<RowDataPacket[]>(
+			`
+			SELECT * 
+			FROM location_permissions 
+			WHERE owner_id = ?;
+			`,
+			[ownerId]
+		);
+
+		return rows;
+	} catch (error) {
+		console.log("Error getting friends", error);
+		return [];
+	}
+};

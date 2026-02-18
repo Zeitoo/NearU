@@ -1,9 +1,8 @@
 import WebSocket, { RawData } from "ws";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import { onlineUsers } from "../state/onLineUsers";
+import { onlineUsers, permissions } from "../state/onLineUsers";
 
-import type { AuthenticatedSocket } from "../types";
-
+import type { AuthenticatedSocket, webSocketMessage } from "../types";
 type UserId = number;
 
 // Rate limiting por usuário
@@ -86,8 +85,9 @@ export async function handleWebSocketConnection(
 				return;
 			}
 
-			const data = JSON.parse(message.toString());
+			const data = JSON.parse(message.toString()) as webSocketMessage;
 			console.log(data);
+			handleMessage(data);
 		} catch (error) {
 			console.error("Erro ao processar mensagem:", error);
 		}
@@ -145,3 +145,22 @@ setInterval(() => {
 		}
 	}
 }, 35 * 60 * 1000);
+
+const handleMessage = (data: webSocketMessage) => {
+	switch (data.type) {
+		case "LOCATION-UPDATE":
+			console.log(
+				"targets:  ",
+				"de ",
+				data.payload.user.user_name,
+				permissions.get(data.payload.user.user_id)
+			);
+			permissions.get(data.payload.user.user_id)?.forEach((element) => {
+				if (onlineUsers.isOnline(element)) {
+					onlineUsers.getSocket(element)?.send(JSON.stringify(data));
+				}
+			});
+
+			break;
+	}
+};

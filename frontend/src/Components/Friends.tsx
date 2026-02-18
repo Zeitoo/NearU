@@ -136,6 +136,13 @@ export default function Friends() {
 
 	return (
 		<div className="pb-20 friends">
+			<div className="fixed left-1/2 -translate-x-1/2 h-15 bottom-0 flex items-center justify-center w-12 z-50">
+				<div
+					onClick={() => {
+						setValue("");
+					}}
+					className="h-10 aspect-square cursor-pointer"></div>
+			</div>
 			<header className="flex justify-between border-b-gray-300 border-b p-3 px-4 items-center">
 				<h1 className="text-2xl text-indigo-500 font-semibold">
 					Friends

@@ -17,23 +17,6 @@ const intialFriends = {
 		blocked_by: [],
 	},
 };
-const fakeLocations: locations[] = [
-	{
-		user: {
-			email_address: "joao@mail.com",
-			phone_number: "84133138",
-			profile_img: 18,
-			user_id: 7,
-			online: true,
-			user_name: "Joao",
-		},
-		location: {
-			accuracy: 122836,
-			latitude: -25.055716,
-			longitude: 33.701074,
-		},
-	},
-];
 
 function App() {
 	const { logged, accessTokenRef } = useAuth();
@@ -50,19 +33,19 @@ function App() {
 		}
 	};
 
-	const [locations, setLocations] = useState<locations[] | null>(
-		fakeLocations
-	);
+	const [locations, setLocations] = useState<locations[] | null>(null);
 	const [myLocation, setMyLocation] = useState<LocationState>({
 		accuracy: 122836,
 		latitude: -25.055716,
 		longitude: 33.701074,
 	});
+
 	const [error, setError] = useState<string | null>(null);
 	const watchId = useRef<number | null>(null);
 	const Navigate = useNavigate();
 	const locationUrl = useLocation();
 
+	console.log(locations);
 	const startTracking = () => {
 		if (!navigator.geolocation) {
 			setError("Geolocalização não suportada.");
@@ -99,7 +82,6 @@ function App() {
 		fetchFriends();
 	}, [logged]);
 
-	/*
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setMyLocation((prev) => ({
@@ -107,18 +89,18 @@ function App() {
 				longitude: prev.longitude + 0.00001,
 				accuracy: prev.accuracy,
 			}));
-		}, 6000);
+		}, 36000);
 
 		return () => clearInterval(interval);
-	}, []);*/
+	}, []);
+
+	if (locationUrl.pathname == "/") {
+		setTimeout(() => {
+			Navigate("/map");
+		}, 1000);
+	}
 
 	if (logged) {
-		if (locationUrl.pathname == "/") {
-			setTimeout(() => {
-				Navigate("map");
-			}, 1000);
-		}
-
 		return (
 			<>
 				<WebSocketProvider
@@ -145,6 +127,18 @@ function App() {
 					</div>
 				</WebSocketProvider>
 			</>
+		);
+	}
+
+	if (
+		locationUrl.pathname.includes("login") ||
+		locationUrl.pathname.includes("signin") ||
+		locationUrl.pathname.includes("signup")
+	) {
+		return (
+			<div className="text-black">
+				<Outlet />
+			</div>
 		);
 	}
 

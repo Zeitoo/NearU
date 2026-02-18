@@ -6,7 +6,9 @@ export default function Settings() {
 	const [editMode, setEditMode] = useState<boolean>(false);
 	const { user } = useUser();
 
-	const [selectedAvatar, setselectedAvatar] = useState<number>(user?.profile_img || 1);
+	const [selectedAvatar, setselectedAvatar] = useState<number>(
+		user?.profile_img || 1
+	);
 
 	const parentClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
 		e.stopPropagation();
@@ -14,7 +16,6 @@ export default function Settings() {
 		const childs = target.querySelectorAll("input");
 		Array.from(childs).forEach((element) => element.click());
 	};
-
 
 	return (
 		<div className="settings select-none flex flex-col text-sm pb-20">
@@ -79,14 +80,20 @@ export default function Settings() {
 
 						<div className="mt-5 text-center">
 							<p className="font-semibold">{user?.user_name}</p>
-							<p className="text-gray-700">{user?.email_address}</p>
-							<p className="text-gray-400 font-medium">{user?.phone_number}</p>
+							<p className="text-gray-700">
+								{user?.email_address}
+							</p>
+							<p className="text-gray-400 font-medium">
+								{user?.phone_number}
+							</p>
 						</div>
 					</>
 				)}
 
 				{editMode ? (
 					<AvatarSelector
+						setEditMode={setEditMode}
+						selectedAvatar={selectedAvatar}
 						modeSetter={setEditMode}
 						avatarsetter={setselectedAvatar}
 					/>
@@ -145,7 +152,7 @@ export default function Settings() {
 						<div className="border w-full overflow-hidden border-gray-300 rounded-lg ">
 							<div
 								onClick={parentClickHandler}
-								className="w-full border-b border-b-gray-400 transition-all hover:bg-gray-200 flex p-2">
+								className="w-full border-b-gray-400 transition-all hover:bg-gray-200 flex p-2">
 								<div className="p-2">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -177,46 +184,6 @@ export default function Settings() {
 									/>
 								</label>
 							</div>
-
-							<div
-								onClick={parentClickHandler}
-								className="w-full hover:bg-gray-200 flex p-2">
-								<div className="p-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 24 24"
-										strokeWidth={1.5}
-										stroke="currentColor"
-										className="size-6">
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-										/>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
-										/>
-									</svg>
-								</div>
-
-								<div className="flex-1 text-[12px] w-full flex items-center">
-									<p>Pedidos de localização</p>
-								</div>
-								<label className="flex items-center cursor-pointer">
-									<input
-										onClick={(e) => {
-											e.stopPropagation();
-										}}
-										type="checkbox"
-										name="localizacao"
-										id="localizacao"
-										className="switch"
-									/>
-								</label>
-							</div>
 						</div>
 
 						<h2 className="text-gray-600 my-4 font-semibold">
@@ -225,7 +192,7 @@ export default function Settings() {
 
 						<div className="border overflow-hidden w-full border-gray-300 rounded-lg ">
 							<NavLink
-								to="passwordreset"
+								to="/passwordchange"
 								className="w-full border-b transition-all hover:bg-gray-200 border-b-gray-400 flex p-2">
 								<div className="p-2">
 									<svg

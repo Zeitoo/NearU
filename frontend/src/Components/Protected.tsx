@@ -7,9 +7,11 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 	const { user, loading } = useAuth();
 
 	if (loading) {
-		return (<div className="fixed flex justify-center items-center  top-0 left-0 h-screen w-full ">
-			<div className="loadere loader-black w-20"></div>
-		</div>)
+		return (
+			<div className="fixed protector flex justify-center items-center  top-0 left-0 h-screen w-full ">
+				<div className="loadere loader-black w-20"></div>
+			</div>
+		);
 	}
 
 	if (!user) {

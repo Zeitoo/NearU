@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { generatAccessToken } from "../utils/token";
-import jwt, { TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import { SignUpForm } from "../utils/zodSchemas";
 import {
 	getUsersByEmail,
@@ -8,22 +7,26 @@ import {
 	putUser,
 	getRefreshToken,
 	deleteRefreshToken,
+	getUsersById,
+	updateUserPass,
 } from "../models/auth.model";
 import { compareHashPasswords } from "../utils/auth";
 import { generateToken } from "../utils/token";
-import crypto from "crypto";
-
-const isProduction = process.env.NODE_ENV === "production";
+import { AuthRequest } from "../types";
 
 export default class auth {
 	static async login(req: Request, res: Response) {
-		const user = await getUsersByEmail(req.body.email);
+		const { email, password, session } = req.body;
+
+		if (!email)
+			return res.status(400).json({ message: "Email nao fornecido." });
+		const user = await getUsersByEmail(email);
+
 		if (!user.password_hash || !user.id || !user.user_name)
 			return res.status(400);
-		const result = await compareHashPasswords(
-			req.body.password,
-			user.password_hash
-		);
+
+		const result = await compareHashPasswords(password, user.password_hash);
+
 		if (!result)
 			return res.status(401).json({ message: "Invalid credentials" });
 
@@ -31,12 +34,13 @@ export default class auth {
 		const refreshToken = generateToken(32);
 
 		const resposta = await putRefreshToken(refreshToken, user.id);
+
 		if (!resposta)
 			return res.status(500).json({ message: "Houve um erro no login." });
 
 		res.cookie("refresh_token", refreshToken, {
 			httpOnly: true,
-			maxAge: 1000 * 60 * 60 * 24 * 7,
+			maxAge: session ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 60 * 24,
 		});
 
 		return res.status(200).json({
@@ -73,12 +77,9 @@ export default class auth {
 		const refreshToken = generateToken(32);
 
 		if (!refresh_token)
-			return res
-				.status(200)
-				.json({
-					message:
-						"Refresh token não fornecido. Por favor fazer login",
-				});
+			return res.status(200).json({
+				message: "Refresh token não fornecido. Por favor fazer login",
+			});
 
 		const response = await getRefreshToken(refresh_token);
 
@@ -120,7 +121,6 @@ export default class auth {
 
 	static async logout(req: Request, res: Response) {
 		const { refresh_token } = req.cookies;
-		console.log("The refresh Token");
 		if (!refresh_token)
 			return res
 				.status(400)
@@ -130,7 +130,9 @@ export default class auth {
 		if (!response)
 			return res.status(400).json({ message: "Refresh token invalido." });
 
-		res.status(200).json({ message: "Logout feito com sucesso." });
+		res.clearCookie("refresh_token");
+
+		return res.status(200).json({ message: "Logout feito com sucesso." });
 	}
 
 	static async reset(req: Request, res: Response) {
@@ -140,9 +142,37 @@ export default class auth {
 		}, 4000);
 	}
 
-	static async activate(req: Request, res: Response) {}
+	static async changePass(req: AuthRequest, res: Response) {
+		const { actual, newPass } = req.body;
+		if (!actual || !newPass)
+			return res.status(400).json({ message: "Informacoes ausentes." });
 
-	static async test(req: Request, res: Response) {
-		res.send(generatAccessToken({ id: 1, user_name: "test" }));
+		if (!req.user?.id)
+			return res.status(401).json({
+				message:
+					"Primeiro inicie a sessao antes de tricar de palavra-passe.",
+			});
+
+		const response = await getUsersById(req.user?.id);
+
+		if (!response.password_hash)
+			return res.status(404).json({ message: "user nao encontrado." });
+
+		const isValid = await compareHashPasswords(
+			actual,
+			response.password_hash
+		);
+
+		if (isValid) {
+			const resposta = await updateUserPass(newPass, req.user.id);
+
+			if (!resposta)
+				return res.status(400).json({ message: "Deu errado" });
+			return res.status(200).json({ message: "Sucesso" });
+		}
+
+		return res.status(200).json({ message: "palavra-passe errada." });
 	}
+
+	static async activate(req: Request, res: Response) {}
 }
