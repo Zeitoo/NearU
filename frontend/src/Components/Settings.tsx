@@ -292,7 +292,7 @@ export default function Settings() {
 								<p className="font-semibold">Terminar sessão</p>
 							</NavLink>
 							<NavLink
-								to="deleteaccount"
+								to="/deleteaccount"
 								className="w-full inline-block transition-all hover:bg-red-300 p-4">
 								<p className="text-[12px] text-center">
 									Apagar conta

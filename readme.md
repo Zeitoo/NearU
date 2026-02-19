@@ -1,1 +1,4 @@
-Ao bloquear user a a partilha deve ser interropida 
+Activacao de contas via whatsapp ou email
+Inegracao com contactos 
+Google login
+Ajustar routas segundo REST

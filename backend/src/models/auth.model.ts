@@ -187,3 +187,23 @@ export const deleteRefreshToken = async (refreshToken: string) => {
 		return null;
 	}
 };
+
+export const deleteAccountSql = async (user_id: number) => {
+	try {
+		const rows = await pool.query<ResultSetHeader>(
+			` DELETE FROM users WHERE id = ? LIMIT 1;
+			`,
+			[user_id]
+		);
+
+		if (Array.isArray(rows)) {
+			const [result] = rows;
+			return result.affectedRows > 0;
+		}
+
+		return false;
+	} catch (error) {
+		console.error("Error in getRefreshToken:", error);
+		return null;
+	}
+};

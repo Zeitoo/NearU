@@ -10,4 +10,6 @@ router.patch("/changepass", authMiddleware.verifyJwt, auth.changePass);
 router.post("/reset", auth.reset);
 router.get("/activate", auth.activate);
 router.delete("/logout", auth.logout);
+router.post("/deleteaccount", authMiddleware.verifyJwt, auth.deleteAccount);
+
 export default router;

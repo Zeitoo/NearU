@@ -17,6 +17,11 @@ interface changePassType {
 	newPass: string;
 }
 
+interface serverResponse {
+	message: string;
+	data: any;
+}
+
 import { api } from "../auth/auth";
 
 function useSign() {
@@ -33,7 +38,7 @@ function useSign() {
 				credentials: "include",
 			});
 
-			const message = await response.json();
+			const message = (await response.json()) as serverResponse;
 
 			return message;
 		} catch (error: any) {
@@ -51,7 +56,7 @@ function useSign() {
 				body: JSON.stringify(data),
 			});
 
-			const message = await response.json();
+			const message = (await response.json()) as serverResponse;
 			return message;
 		} catch (error: any) {
 			return { message: error.message };
@@ -61,6 +66,17 @@ function useSign() {
 	const changePass = async (data: changePassType) => {
 		try {
 			const response = await api.patch("api/auth/changepass", data);
+
+			const message = response.data as serverResponse;
+			return message;
+		} catch (error: any) {
+			return { message: error.message };
+		}
+	};
+
+	const deleteAccount = async (data: { password: string }) => {
+		try {
+			const response = await api.post("api/auth/deleteaccount", data);
 
 			const message = response.data;
 			return message;
@@ -73,6 +89,7 @@ function useSign() {
 		signIn,
 		signUp,
 		changePass,
+		deleteAccount,
 	};
 }
 export default useSign;

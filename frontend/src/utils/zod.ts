@@ -58,6 +58,18 @@ export const passChangeschema = z.object({
 		}),
 });
 
+export const deleteAccountchema = z.object({
+	password: z
+		.string()
+		.nonempty("Palavra-passe é obrigatória")
+		.min(8, "Muito curta")
+		.max(12, "Muito longa")
+		.regex(/[!@#$%&*?]/, {
+			message: "Deve conter pelo menos um símbolo",
+		}),
+});
+
+export type deleteAccountForm = z.infer<typeof deleteAccountchema>;
 export type passChangeForm = z.infer<typeof passChangeschema>;
 export type SignInForm = z.infer<typeof formsChema>;
 

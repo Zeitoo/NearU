@@ -84,12 +84,14 @@ function App() {
 
 	useEffect(() => {
 		const interval = setInterval(() => {
+			const latitude = Number((Math.random() * 0.001).toFixed(5));
+			const longitude = Number((Math.random() * 0.001).toFixed(5));
 			setMyLocation((prev) => ({
-				latitude: prev.latitude - 0.00005,
-				longitude: prev.longitude + 0.00001,
+				latitude: prev.latitude - latitude,
+				longitude: prev.longitude + longitude,
 				accuracy: prev.accuracy,
 			}));
-		}, 36000);
+		}, 3000);
 
 		return () => clearInterval(interval);
 	}, []);
@@ -106,7 +108,6 @@ function App() {
 				<WebSocketProvider
 					isSharing={isSharing}
 					myLocation={myLocation}
-					locations={locations}
 					setLocations={setLocations}
 					url={`${import.meta.env.VITE_WEBSOCKET_URL}?token=${
 						accessTokenRef.current

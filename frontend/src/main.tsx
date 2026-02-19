@@ -21,6 +21,7 @@ import { ProtectedRoute } from "./Components/Protected.tsx";
 import PasswordReset from "./Components/PasswordReset.tsx";
 import PasswordChange from "./Components/PasswordChange.tsx";
 import NotFound from "./Components/NotFound.tsx";
+import DeleteAccount from "./Components/DeleteAccount.tsx";
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route
@@ -73,12 +74,17 @@ const router = createBrowserRouter(
 			/>
 			<Route
 				path="passwordchange"
-				element={<PasswordChange/>}
+				element={<PasswordChange />}
 			/>
 			<Route
 				path="passwordreset"
-				element={<PasswordReset/>}
+				element={<PasswordReset />}
 			/>
+			<Route
+				path="deleteaccount"
+				element={<DeleteAccount />}
+			/>
+
 			<Route
 				path="*"
 				element={<NotFound />}

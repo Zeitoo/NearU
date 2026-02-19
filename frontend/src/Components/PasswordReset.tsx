@@ -1,8 +1,10 @@
 export default function PasswordReset () {
 
     return (
-        <div>
-            
+        <div className="">
+            <div>
+                
+            </div>
         </div>
     )
 }

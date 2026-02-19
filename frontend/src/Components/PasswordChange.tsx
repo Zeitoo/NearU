@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSign from "../hooks/useSign";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { passChangeschema } from "../utils/zod";
 import type { passChangeForm } from "../utils/zod";
 
@@ -48,9 +48,10 @@ export default function PasswordChange() {
 					<h1 className="text-xl mb-3 font-semibold">
 						Mudança de palavra-passe
 					</h1>
-					<p className="text-gray-500">
+					<p className="text-gray-500 text-justify">
 						Preencha os campos abaixo para alterar a sua
-						palavra-passe.
+						palavra-passe. Caso não lembre pode{" "}
+						<Link to={"/passwordreset"} className="font-semibold text-purple-400">repor palavra-passe</Link>.
 					</p>
 				</div>
 

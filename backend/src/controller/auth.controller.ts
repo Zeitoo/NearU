@@ -9,6 +9,7 @@ import {
 	deleteRefreshToken,
 	getUsersById,
 	updateUserPass,
+	deleteAccountSql,
 } from "../models/auth.model";
 import { compareHashPasswords } from "../utils/auth";
 import { generateToken } from "../utils/token";
@@ -135,13 +136,6 @@ export default class auth {
 		return res.status(200).json({ message: "Logout feito com sucesso." });
 	}
 
-	static async reset(req: Request, res: Response) {
-		console.log(req.body);
-		setTimeout(() => {
-			res.status(200).json({ message: "reseted" });
-		}, 4000);
-	}
-
 	static async changePass(req: AuthRequest, res: Response) {
 		const { actual, newPass } = req.body;
 		if (!actual || !newPass)
@@ -174,5 +168,43 @@ export default class auth {
 		return res.status(200).json({ message: "palavra-passe errada." });
 	}
 
+	static async deleteAccount(req: AuthRequest, res: Response) {
+		const { password } = req.body;
+		if (!password)
+			return res.status(400).json({ message: "Palavra-passe ausente." });
+
+		if (!req.user?.id)
+			return res.status(401).json({
+				message: "Primeiro inicie a sessao antes de apagar a conta.",
+			});
+
+		const response = await getUsersById(req.user?.id);
+
+		if (!response.password_hash)
+			return res.status(404).json({ message: "user nao encontrado." });
+
+		const isValid = await compareHashPasswords(
+			password,
+			response.password_hash
+		);
+
+		if (isValid) {
+			const resposta = await deleteAccountSql(req.user.id);
+
+			if (!resposta)
+				return res.status(400).json({ message: "Deu errado" });
+			return res.status(200).json({ message: "Sucesso" });
+		}
+
+		return res.status(400).json({ message: "palavra-passe errada." });
+	}
+
 	static async activate(req: Request, res: Response) {}
+
+	static async reset(req: Request, res: Response) {
+		console.log(req.body);
+		setTimeout(() => {
+			res.status(200).json({ message: "reseted" });
+		}, 4000);
+	}
 }
