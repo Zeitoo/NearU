@@ -28,7 +28,6 @@ interface WebSocketProviderProps {
 	children: ReactNode;
 	setLocations: React.Dispatch<React.SetStateAction<locations[] | null>>;
 	myLocation: LocationState | null;
-	isSharing: boolean;
 }
 
 export const WebSocketProvider = ({
@@ -36,7 +35,6 @@ export const WebSocketProvider = ({
 	children,
 	myLocation,
 	setLocations,
-	isSharing,
 }: WebSocketProviderProps) => {
 	const socketRef = useRef<WebSocket | null>(null);
 	const reconnectAttempts = useRef(0);

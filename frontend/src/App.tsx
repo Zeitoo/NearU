@@ -23,6 +23,10 @@ function App() {
 	const [Friends, setFriends] = useState<friendsReq>(intialFriends);
 
 	const [isSharing, setIsSharing] = useState<boolean>(true);
+
+	setIsSharing 
+	isSharing
+
 	const fetchFriends = async () => {
 		const response = await api.get("api/friends");
 
@@ -45,7 +49,7 @@ function App() {
 	const Navigate = useNavigate();
 	const locationUrl = useLocation();
 
-	console.log(locations);
+	error
 	const startTracking = () => {
 		if (!navigator.geolocation) {
 			setError("Geolocalização não suportada.");
@@ -106,7 +110,6 @@ function App() {
 		return (
 			<>
 				<WebSocketProvider
-					isSharing={isSharing}
 					myLocation={myLocation}
 					setLocations={setLocations}
 					url={`${import.meta.env.VITE_WEBSOCKET_URL}?token=${

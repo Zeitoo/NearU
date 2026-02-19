@@ -20,6 +20,7 @@ export default function LocationControl({
 		viewerId: number
 	) => {
 		e.stopPropagation();
+		startTracking;
 
 		const target = e.target as React.DetailedHTMLProps<
 			React.InputHTMLAttributes<HTMLInputElement>,
