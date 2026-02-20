@@ -13,10 +13,10 @@ export default class user {
 		let response = await getUsersByName(name);
 
 		if (!response)
-			return res.status(200).json({ message: "No user found." });
+			return res.status(404).json({ message: "No user found." });
 
 		response = response.filter((element) => element.id != req.user?.id);
-		res.status(200).json({
+		return res.status(200).json({
 			message: "sucess",
 			users: response.map((element) => {
 				return {

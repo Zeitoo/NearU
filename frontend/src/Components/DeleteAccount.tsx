@@ -100,7 +100,7 @@ export default function DeleteAccount() {
 											placeholder="Palavra-passe"
 											id="password"
 											aria-label="Palavra-passe"
-											autoComplete="current-password"
+											autoComplete="off"
 											className={`password border-2 transition-colors ${
 												errors.password?.message
 													? "border-red-300"

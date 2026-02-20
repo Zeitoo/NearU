@@ -91,7 +91,7 @@ export default class FriendsController {
 			message: "Você recebeu um pedido de amizade",
 		});
 
-		res.status(200).json({ message: "Success" });
+		res.status(201).json({ message: "Success" });
 	}
 
 	// Aceitar pedido de amizade

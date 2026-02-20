@@ -21,15 +21,16 @@ export default class auth {
 
 		if (!email)
 			return res.status(400).json({ message: "Email nao fornecido." });
+		
 		const user = await getUsersByEmail(email);
 
 		if (!user.password_hash || !user.id || !user.user_name)
-			return res.status(400);
+			return res.status(404).json({message: "User nao encontrado."})
 
 		const result = await compareHashPasswords(password, user.password_hash);
 
 		if (!result)
-			return res.status(401).json({ message: "Invalid credentials" });
+			return res.status(400).json({ message: "Invalid credentials" });
 
 		delete user.password_hash;
 		const refreshToken = generateToken(32);
@@ -58,17 +59,18 @@ export default class auth {
 		const data: SignUpForm = req.body;
 
 		const response = await putUser(data);
-
-		if (response) {
-			setTimeout(() => {
-				res.status(200).json(response);
-			}, 3000);
+		if (!response) {
+			return res.status(500).json({
+				message: "Erro interno do servidor no auth...",
+			});
 		} else {
-			setTimeout(() => {
-				res.status(500).json({
-					message: "Erro interno do servidor no auth...",
-				});
-			}, 4000);
+			if (response.message == "name") {
+				return res.status(400).json({ message: "name" });
+			} else if (response.message == "email") {
+				return res.status(400).json({ message: "email" });
+			}
+
+			return res.status(200).json({ message: "success" });
 		}
 	}
 
@@ -78,15 +80,14 @@ export default class auth {
 		const refreshToken = generateToken(32);
 
 		if (!refresh_token)
-			return res.status(200).json({
+			return res.status(400).json({
 				message: "Refresh token não fornecido. Por favor fazer login",
 			});
 
 		const response = await getRefreshToken(refresh_token);
 
 		if (!response) {
-			console.log(response);
-			res.status(200).json({ message: "Refresh token inválido." });
+			res.status(404).json({ message: "Refresh token inválido." });
 
 			return;
 		}
@@ -126,6 +127,7 @@ export default class auth {
 			return res
 				.status(400)
 				.json({ message: "Refresh token não fornecido." });
+
 		const response = await deleteRefreshToken(refresh_token);
 
 		if (!response)
@@ -138,13 +140,14 @@ export default class auth {
 
 	static async changePass(req: AuthRequest, res: Response) {
 		const { actual, newPass } = req.body;
+
 		if (!actual || !newPass)
 			return res.status(400).json({ message: "Informacoes ausentes." });
 
 		if (!req.user?.id)
 			return res.status(401).json({
 				message:
-					"Primeiro inicie a sessao antes de tricar de palavra-passe.",
+					"Primeiro inicie a sessao antes de trocar de palavra-passe.",
 			});
 
 		const response = await getUsersById(req.user?.id);
@@ -161,7 +164,7 @@ export default class auth {
 			const resposta = await updateUserPass(newPass, req.user.id);
 
 			if (!resposta)
-				return res.status(400).json({ message: "Deu errado" });
+				return res.status(500).json({ message: "Deu errado" });
 			return res.status(200).json({ message: "Sucesso" });
 		}
 

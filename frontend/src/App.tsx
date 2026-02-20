@@ -24,8 +24,8 @@ function App() {
 
 	const [isSharing, setIsSharing] = useState<boolean>(true);
 
-	setIsSharing 
-	isSharing
+	setIsSharing;
+	isSharing;
 
 	const fetchFriends = async () => {
 		const response = await api.get("api/friends");
@@ -49,7 +49,7 @@ function App() {
 	const Navigate = useNavigate();
 	const locationUrl = useLocation();
 
-	error
+	error;
 	const startTracking = () => {
 		if (!navigator.geolocation) {
 			setError("Geolocalização não suportada.");

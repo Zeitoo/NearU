@@ -49,7 +49,7 @@ function useSign() {
 	const signUp = async (data: signUpType) => {
 		try {
 			const response = await fetch(`${host}/api/auth/register`, {
-				method: "POST",
+				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
 				},
@@ -76,7 +76,9 @@ function useSign() {
 
 	const deleteAccount = async (data: { password: string }) => {
 		try {
-			const response = await api.post("api/auth/deleteaccount", data);
+			const response = await api.delete("api/auth/deleteaccount", {
+				data
+			});
 
 			const message = response.data;
 			return message;

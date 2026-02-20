@@ -5,7 +5,9 @@ export default function useFriend(
 ) {
 	const removeFriend = async (friendId: number) => {
 		try {
-			const response = await api.post("api/friends/remove", { friendId });
+			const response = await api.delete("api/friends/remove", {
+				data: { friendId },
+			});
 
 			if (response.status === 200) {
 				setFriends((prev) => ({
@@ -84,7 +86,7 @@ export default function useFriend(
 
 	const acceptRequest = async (friendId: number) => {
 		try {
-			const response = await api.post("api/friends/accept", { friendId });
+			const response = await api.put("api/friends/accept", { friendId });
 
 			if (response.status === 200) {
 				setFriends((prev) => {
@@ -116,8 +118,10 @@ export default function useFriend(
 
 	const unblockFriend = async (friendId: number) => {
 		try {
-			const response = await api.post("api/friends/unblock", {
-				friendId,
+			const response = await api.delete("api/friends/unblock", {
+				data: {
+					friendId,
+				},
 			});
 
 			if (response.status === 200) {

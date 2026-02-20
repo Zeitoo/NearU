@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import type { outletContextType } from "../types";
 import { useOutletContext } from "react-router-dom";
@@ -15,6 +15,10 @@ export default function Map() {
 	const friendsBtnHandler = () => {
 		setFriendsExpanded(!friendsExpanded);
 	};
+
+	useEffect(() => {
+		document.title = "Mapa"
+	}, [])
 
 	return (
 		<div className="relative h-dvh">

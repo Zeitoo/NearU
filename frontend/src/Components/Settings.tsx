@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AvatarSelector from "./AvatarSelector";
 import { useUser } from "../hooks/useUser";
 export default function Settings() {
@@ -16,6 +16,10 @@ export default function Settings() {
 		const childs = target.querySelectorAll("input");
 		Array.from(childs).forEach((element) => element.click());
 	};
+
+	useEffect(() => {
+		document.title = "Configuracoes";
+	}, []);
 
 	return (
 		<div className="settings select-none flex flex-col text-sm pb-20">

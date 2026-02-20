@@ -46,7 +46,7 @@ export default function Friends() {
 
 	const addRequest = async (friendId: number) => {
 		try {
-			const response = await api.post("api/friends/add", { friendId });
+			const response = await api.put("api/friends/add", { friendId });
 
 			if (response.status === 200) {
 				setFriends((prev) => {
@@ -133,6 +133,10 @@ export default function Friends() {
 	useEffect(() => {
 		fetchUsers();
 	}, [value]);
+
+	useEffect(() => {
+		document.title = "Amigos"
+	}, [])
 
 	return (
 		<div className="pb-20 friends">
