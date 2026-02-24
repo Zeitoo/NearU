@@ -14,7 +14,6 @@ passport.use(
 			try {
 				const email = profile.emails?.[0]?.value;
 
-				console.log(profile);
 				if (!email)
 					return done(new Error("Email não fornecido pelo Google"));
 

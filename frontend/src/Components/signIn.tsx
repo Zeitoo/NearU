@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSign from "../hooks/useSign";
-import { useUser } from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import renderButton from "./hidePassword";
 import { formsChema } from "../utils/zod";
@@ -16,10 +15,9 @@ export default function SignIn() {
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
 
-	const { setUser } = useUser();
 	const navigate = useNavigate();
 	const { signIn } = useSign();
-	const { accessTokenRef } = useAuth();
+	const { refreshAccessToken } = useAuth();
 	const form = useForm({
 		resolver: zodResolver(formsChema),
 	});
@@ -33,13 +31,11 @@ export default function SignIn() {
 		setLoading(true);
 		signIn(data).then((response) => {
 			setLoading(false);
-			console.log("Resposta do sigin:  ", "  /  . ", response);
 			if (response.message.includes("sucesso")) {
-				setUser(response.user);
-				accessTokenRef.current = response.access_token;
+				refreshAccessToken();
 				setTimeout(() => {
 					navigate("/map");
-				}, 2000);
+				}, 4000);
 			} else if (response.message === "Invalid credentials") {
 				setError("email", {
 					message: "Email ou palavra-passe inválidos",

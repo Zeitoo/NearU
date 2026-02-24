@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { api } from "../auth/auth";
 import { useUser } from "../hooks/useUser";
 
@@ -43,13 +44,17 @@ function AvatarSelector({
 
 	const avatars = Array(46).fill("d");
 
+	useEffect(() => {
+		document.title = "Mudar perfil";
+	}, []);
+
 	return (
 		<div className="h-full flex-1">
 			<p className="font-semibold text-center mt-4">
 				Escolha o seu novo avatar para o perfil
 			</p>
 			<div className="appear p-3 flex justify-center">
-				<div className="border-2 max-h-[50vh] overflow-y-auto border-gray-300 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-4 p-4 rounded-lg place-items-center">
+				<div className="border-2 scroll-none max-h-[50vh] overflow-y-auto border-gray-300 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-4 p-4 rounded-lg place-items-center">
 					{avatars.map((avatar, index) => {
 						avatar;
 						return (

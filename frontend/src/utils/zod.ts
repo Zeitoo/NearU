@@ -42,12 +42,7 @@ export const formsChema = z.object({
 export const passChangeschema = z.object({
 	actual: z
 		.string()
-		.nonempty("Palavra-passe é obrigatória")
-		.min(8, "Muito curta")
-		.max(12, "Muito longa")
-		.regex(/[!@#$%&*?]/, {
-			message: "Deve conter pelo menos um símbolo",
-		}),
+		,
 	newPass: z
 		.string()
 		.nonempty("Palavra-passe é obrigatória")

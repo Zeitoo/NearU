@@ -82,15 +82,14 @@ export default class auth {
 		const refreshToken = generateToken(32);
 
 		if (!refresh_token)
-			return res.status(200).json({
+			return res.status(401).json({
 				message: "Refresh token não fornecido. Por favor fazer login",
 			});
 
 		const response = await getRefreshToken(refresh_token);
 
 		if (!response) {
-			console.log(response);
-			res.status(200).json({ message: "Refresh token inválido." });
+			res.status(401).json({ message: "Refresh token inválido." });
 
 			return;
 		}
@@ -165,7 +164,7 @@ export default class auth {
 		const { refresh_token } = req.cookies;
 		if (!refresh_token)
 			return res
-				.status(400)
+				.status(401)
 				.json({ message: "Refresh token não fornecido." });
 		const response = await deleteRefreshToken(refresh_token);
 
@@ -206,7 +205,7 @@ export default class auth {
 			return res.status(200).json({ message: "Sucesso" });
 		}
 
-		return res.status(200).json({ message: "palavra-passe errada." });
+		return res.status(400).json({ message: "palavra-passe errada." });
 	}
 
 	static async deleteAccount(req: AuthRequest, res: Response) {
@@ -238,14 +237,5 @@ export default class auth {
 		}
 
 		return res.status(400).json({ message: "palavra-passe errada." });
-	}
-
-	static async activate(req: Request, res: Response) {}
-
-	static async reset(req: Request, res: Response) {
-		console.log(req.body);
-		setTimeout(() => {
-			res.status(200).json({ message: "reseted" });
-		}, 4000);
 	}
 }

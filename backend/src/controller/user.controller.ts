@@ -64,7 +64,6 @@ export default class user {
 	static async getUser(req: AuthRequest, res: Response) {
 		const { access_token } = req.body;
 
-		console.log(access_token);
 		if (!access_token || !process.env.AUTHORIZATION_SECRET) {
 			return res.status(401).json({ message: "Credenciais ausentes." });
 		}

@@ -192,7 +192,23 @@ input[type="checkbox"].switch:checked::before {
 	pointer-events: none;
 	user-select: none;
 	touch-action: none;
-	
+
 	z-index: 2000;
-	backdrop-filter: brightness(0.75) invert(1) contrast(1.9) hue-rotate(	80deg);
+	backdrop-filter: brightness(0.75) invert(1) contrast(1.9) hue-rotate(80deg);
+}
+
+footer {
+	bottom: 100%;
+	translate: 0% 100%;
+	height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+	footer {
+		height: auto;
+		top: none;
+		bottom: 0;
+		width: 100%;
+		translate: 0 0;
+	}
 }

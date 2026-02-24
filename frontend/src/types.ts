@@ -51,6 +51,7 @@ export interface socketMsg {
 }
 
 export interface outletContextType {
+	isSharing: boolean;
 	Friends: friendsReq;
 	setFriends: React.Dispatch<React.SetStateAction<friendsReq>>;
 	startTracking: () => void;
@@ -66,6 +67,6 @@ export type LocationState = {
 };
 
 export interface locations {
-	user: User;
-	location: LocationState;
+  user: User;
+  location: LocationState | null;
 }

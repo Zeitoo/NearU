@@ -1,11 +1,13 @@
 import { NavLink } from "react-router-dom";
-
+import { useUser } from "../hooks/useUser";
 export default function Footer() {
+	const { user } = useUser();
+
 	return (
-		<footer className="text-gray-600 rounded-t-xl bg-white font-semibold text-[11px] p-2.5 px-10 fixed bottom-0 w-full z-40">
-			<div>
-				<nav>
-					<ul className="flex justify-between items-center">
+		<footer className="text-gray-600 rounded-t-xl md:rounded-t-none bg-white font-semibold text-[11px] p-2.5 px-10 md:px-5 fixed z-40 ">
+			<div className="md:h-full">
+				<nav className="md:h-full md:flex md:flex-col">
+					<ul className="flex md:flex-col justify-between md:gap-10 md:mt-10 items-center">
 						<li className="flex w-11 justify-center">
 							<NavLink to="/map">
 								<div className="flex flex-col items-center justify-center">
@@ -23,7 +25,7 @@ export default function Footer() {
 										/>
 									</svg>
 
-									<span>Map</span>
+									<span className="md:opacity-0">Map</span>
 								</div>
 							</NavLink>
 						</li>
@@ -45,11 +47,12 @@ export default function Footer() {
 										/>
 									</svg>
 
-									<span>Friends</span>
+									<span className="md:opacity-0">
+										Friends
+									</span>
 								</div>
 							</NavLink>
 						</li>
-
 
 						<li className="flex w-11 justify-center">
 							<NavLink to="/settings">
@@ -73,11 +76,21 @@ export default function Footer() {
 										/>
 									</svg>
 
-									<span>Settings</span>
+									<span className="md:opacity-0">
+										Settings
+									</span>
 								</div>
 							</NavLink>
 						</li>
 					</ul>
+
+					<div className="flex flex-col mt-auto mb-4 items-center justify-center">
+						<img
+							className="hidden md:flex select-none rounded-full aspect-square w-12 "
+							src={`Avatars/avatar (${user?.profile_img}).png`}
+							alt="Profile img"
+						/>
+					</div>
 				</nav>
 			</div>
 		</footer>

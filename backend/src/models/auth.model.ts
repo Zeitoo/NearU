@@ -49,7 +49,7 @@ export const putUserByGoogle = async (profile: {
 	displayName: string;
 	photo?: string;
 }): Promise<User> => {
-	console.log("Colocando google user...")
+
 	// 1. Verificar se já existe conta com este email
 	const existing = await getUsersByEmail(profile.email).catch(() => null);
 

@@ -30,7 +30,6 @@ function AuthCallback() {
 
 			const message = (await response.json()) as serverResponse;
 			if (message.message.includes("succe")) {
-				console.log(message);
 				setUser(message.user);
 				setLogged(true);
 				setTimeout(() => {
@@ -52,8 +51,6 @@ function AuthCallback() {
 			return;
 		}
 		const token = accessToken;
-
-		console.log("Access Token:", token);
 
 		accessTokenRef.current = accessToken;
 		getUser(token);

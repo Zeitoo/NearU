@@ -11,7 +11,5 @@ export function setupWebSocket(server: Server) {
     console.error('Erro no servidor WebSocket:', error);
   });
 
-  console.log('WebSocket Server inicializado');
-
   return wss;
 }

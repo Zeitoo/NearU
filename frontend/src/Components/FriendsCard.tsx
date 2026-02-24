@@ -14,10 +14,11 @@ export default function FriendsCard({
 			| ((friendId: number) => void)
 			| ((friendId: number) => Promise<void>);
 	}[];
+
 }) {
 	return (
 		<>
-			<div className="px-4 mb-4 text-blue-400 text-[12px] font-semibold">
+			<div className="px-4 mb-4 text-blue-400 text-[12px] md:text-sm font-semibold">
 				<p>
 					{type} • {friendType.length}
 				</p>
@@ -29,8 +30,8 @@ export default function FriendsCard({
 						<div
 							className={`min-h-2 ${
 								friend.online
-									? "bg-green-200 hover:bg-green-300"
-									: "bg-blue-50 hover:bg-blue-100"
+									? "bg-green-200 hover:bg-green-300 lg:bg-white"
+									: "bg-blue-50 hover:bg-blue-100 lg:bg-white lg:hover:bg-blue-50"
 							}  gap-1 transition-all my-3 flex items-center p-3 py-6 rounded-lg cursor-pointer`}
 							key={index}>
 							<div className="flex active-avatar overflow-hidden rounded-full items-center">
@@ -40,7 +41,7 @@ export default function FriendsCard({
 								/>
 							</div>
 
-							<div className="flex-1 w-full ml-1 font-semibold text-gray-600 justify-center flex items-start flex-col text-[12px]">
+							<div className="flex-1 w-full ml-2 font-semibold text-gray-600 justify-center flex items-start flex-col text-[12px] md:text-sm">
 								<p>{friend.user_name}</p>
 								{friend.online ? (
 									<p className="text-green-700 ml-1.5 font-semibold">

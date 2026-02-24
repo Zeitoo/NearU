@@ -24,7 +24,6 @@ export default function PasswordChange() {
 		setLoading(true);
 		changePass(data).then((response) => {
 			setLoading(false);
-			console.log(response.message);
 			const message = response.message as string;
 			if (message.includes("Suce")) {
 				navigate("/logout");

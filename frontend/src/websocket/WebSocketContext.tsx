@@ -38,10 +38,10 @@ export const WebSocketProvider = ({
 }: WebSocketProviderProps) => {
 	const socketRef = useRef<WebSocket | null>(null);
 	const reconnectAttempts = useRef(0);
-	const reconnectTimeout = useRef<number| null>(null);
+	const reconnectTimeout = useRef<number | null>(null);
 
 	const MAX_RECONNECT_ATTEMPTS = 10;
-	const BASE_DELAY = 4000; 
+	const BASE_DELAY = 4000;
 
 	const [status, setStatus] = useState<WebSocketStatus>("CONNECTING");
 	const [friendsCounter, setFriendsCounter] = useState<number>(0);
@@ -111,8 +111,7 @@ export const WebSocketProvider = ({
 				return;
 			}
 
-			const delay =
-				BASE_DELAY * Math.pow(2, reconnectAttempts.current);
+			const delay = BASE_DELAY * Math.pow(2, reconnectAttempts.current);
 
 			console.log(
 				`Tentando reconectar em ${delay / 1000}s (tentativa ${
@@ -140,16 +139,19 @@ export const WebSocketProvider = ({
 
 	useEffect(() => {
 		if (status !== "OPEN" || !socketRef.current) return;
-
-		socketRef.current.send(
-			JSON.stringify({
-				type: "LOCATION-UPDATE",
-				payload: {
-					location: myLocation,
-					user: user,
-				},
-			})
-		);
+		setTimeout(() => {
+			if (!!socketRef.current) {
+				socketRef.current.send(
+					JSON.stringify({
+						type: "LOCATION-UPDATE",
+						payload: {
+							location: myLocation,
+							user: user,
+						},
+					})
+				);
+			}
+		}, 1000);
 	}, [myLocation, status, user]);
 
 	const sendMessage = useCallback((data: string | object) => {
@@ -161,8 +163,7 @@ export const WebSocketProvider = ({
 			return;
 		}
 
-		const payload =
-			typeof data === "string" ? data : JSON.stringify(data);
+		const payload = typeof data === "string" ? data : JSON.stringify(data);
 
 		socketRef.current.send(payload);
 	}, []);

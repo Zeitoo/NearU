@@ -24,9 +24,6 @@ function App() {
 
 	const [isSharing, setIsSharing] = useState<boolean>(true);
 
-	setIsSharing;
-	isSharing;
-
 	const fetchFriends = async () => {
 		const response = await api.get("api/friends");
 
@@ -38,11 +35,7 @@ function App() {
 	};
 
 	const [locations, setLocations] = useState<locations[] | null>(null);
-	const [myLocation, setMyLocation] = useState<LocationState>({
-		accuracy: 122836,
-		latitude: -25.055716,
-		longitude: 33.701074,
-	});
+	const [myLocation, setMyLocation] = useState<LocationState | null>(null);
 
 	const [error, setError] = useState<string | null>(null);
 	const watchId = useRef<number | null>(null);
@@ -63,6 +56,8 @@ function App() {
 					longitude: position.coords.longitude,
 					accuracy: position.coords.accuracy,
 				});
+
+				setIsSharing(true);
 			},
 			(err) => {
 				setError(err.message);
@@ -79,6 +74,8 @@ function App() {
 		if (watchId.current !== null) {
 			navigator.geolocation.clearWatch(watchId.current);
 			watchId.current = null;
+			setIsSharing(false);
+			setMyLocation(null);
 		}
 	};
 
@@ -87,20 +84,6 @@ function App() {
 			fetchFriends();
 		}
 	}, [logged]);
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			const latitude = Number((Math.random() * 0.001).toFixed(5));
-			const longitude = Number((Math.random() * 0.001).toFixed(5));
-			setMyLocation((prev) => ({
-				latitude: prev.latitude - latitude,
-				longitude: prev.longitude + longitude,
-				accuracy: prev.accuracy,
-			}));
-		}, 3000);
-
-		return () => clearInterval(interval);
-	}, []);
 
 	if (locationUrl.pathname == "/") {
 		setTimeout(() => {
@@ -120,6 +103,7 @@ function App() {
 					<div className="text-black">
 						<Outlet
 							context={{
+								isSharing,
 								Friends,
 								setFriends,
 								startTracking,

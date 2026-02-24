@@ -9,13 +9,15 @@ const parentClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
 };
 
 export default function LocationControl({
+	stopTracking,
 	startTracking,
 	Friends,
 }: {
+	stopTracking: () => void;
 	startTracking: () => void;
 	Friends: friendsReq;
 }) {
-	const locationHandler = async (
+	const locationHandler = (
 		e: React.MouseEvent<HTMLInputElement, MouseEvent>,
 		viewerId: number
 	) => {
@@ -28,19 +30,18 @@ export default function LocationControl({
 		>;
 
 		try {
-			const response = await api.patch("api/locations", {
+			api.patch("api/locations", {
 				viewerId,
 				isAllowed: target.checked,
 			});
 
-			console.log(response);
 		} catch (error) {
-			console.log("deu erro essa poh");
+			console.log("Houve um erro configurando as localizacoes");
 		}
 	};
 
 	return (
-		<div className="location-control scroll-none overflow-scroll">
+		<div className="location-control scroll-none md:w-85 overflow-scroll">
 			<div>
 				<div
 					onClick={parentClickHandler}
@@ -66,7 +67,7 @@ export default function LocationControl({
 						</svg>
 					</div>
 
-					<div className="h-full text-[12px] ml-2 w-full flex-1 flex justify-center flex-col">
+					<div className="h-full mr-3 text-[12px] ml-2 w-full flex-1 flex justify-center flex-col">
 						<p className="font-semibold">Iniciar Partilha</p>
 						<p className="text-gray-600">
 							Partilhar com todos os selecionados
@@ -77,6 +78,11 @@ export default function LocationControl({
 						<input
 							onClick={(e) => {
 								e.stopPropagation();
+								if (e.currentTarget.checked) {
+									startTracking();
+								} else {
+									stopTracking();
+								}
 							}}
 							type="checkbox"
 							id="ghost-mode"

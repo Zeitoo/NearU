@@ -10,6 +10,6 @@ router.use("/friends", friendRoutes);
 router.use("/user", userRoutes);
 router.use("/locations", locationRoutes);
 router.get("/", (req, res) => {
-	res.status(200).json({ message: "Servidor online." });
+	res.status(200).json({ message: "Api online." });
 });
 export default router;

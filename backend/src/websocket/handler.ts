@@ -1,5 +1,5 @@
 import WebSocket, { RawData } from "ws";
-import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { onlineUsers, permissions } from "../state/onLineUsers";
 
 import type { AuthenticatedSocket, webSocketMessage } from "../types";
@@ -19,7 +19,6 @@ export async function handleWebSocketConnection(
 	ws: AuthenticatedSocket,
 	req: any
 ) {
-	console.log("novo user connectado");
 	const baseUrl = "http://localhost";
 	const url = new URL(req.url || "", baseUrl);
 	const token = url.searchParams.get("token");
@@ -46,12 +45,6 @@ export async function handleWebSocketConnection(
 		ws.userId = userId;
 		ws.token = token;
 	} catch (err) {
-		if (err instanceof TokenExpiredError) {
-			console.log("Token expirado");
-		}
-		if (err instanceof JsonWebTokenError) {
-			console.log("Token inválido");
-		}
 		ws.close();
 		return;
 	}
@@ -86,7 +79,7 @@ export async function handleWebSocketConnection(
 			}
 
 			const data = JSON.parse(message.toString()) as webSocketMessage;
-			console.log(data);
+
 			handleMessage(data);
 		} catch (error) {
 			console.error("Erro ao processar mensagem:", error);

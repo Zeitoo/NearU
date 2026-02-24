@@ -10,7 +10,7 @@ interface DropDownProps {
 
 export default function DropDown({ values, friendId }: DropDownProps) {
 	return (
-		<div className="drop-down h-8 relative text-[12px] aspect-square">
+		<div className="drop-down h-8 relative text-[12px] md:text-sm aspect-square">
 			{values.length > 0 ? (
 				<div className="absolute options z-10 rounded-xl overflow-hidden bg-white flex flex-col justify-start items-start font-semibold gap-0.5 p-1 border-2 border-gray-200 bottom-4 right-0">
 					{values.map((element, index) => {

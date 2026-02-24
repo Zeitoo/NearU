@@ -19,6 +19,7 @@ interface AuthContextType {
 	accessTokenRef: React.RefObject<string | null>;
 	setLogged: React.Dispatch<React.SetStateAction<boolean>>;
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	refreshAccessToken: () => Promise<any>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -29,20 +30,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const accessTokenRef = useRef<string | null>(null);
 	const [logged, setLogged] = useState<boolean>(false);
 	const refreshPromiseRef = useRef<Promise<any> | null>(null);
-	const hasInitializedRef = useRef(false); // Previne double mount do Strict Mode
+	const hasInitializedRef = useRef(false);
 
 	const setAccessToken = useCallback((token: string | null) => {
 		accessTokenRef.current = token;
 	}, []);
 
-	// Função centralizada de refresh que evita chamadas duplicadas
+	const logoutAndRedirect = useCallback(() => {
+		setAccessToken(null);
+		setUser(null);
+		setLogged(false);
+
+		if (!window.location.pathname.includes("/login")) {
+			window.location.href = "/login";
+		}
+	}, [setAccessToken, setUser]);
+
 	const refreshAccessToken = useCallback(async () => {
-		// Se já está fazendo refresh, retorna a promise existente
 		if (refreshPromiseRef.current) {
 			return refreshPromiseRef.current;
 		}
 
-		// Cria uma nova promise de refresh
 		refreshPromiseRef.current = (async () => {
 			try {
 				const res = await api.get("/api/auth/refresh");
@@ -50,31 +58,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 				setAccessToken(access_token);
 				setUser(user);
-
-				const message = res.data.message as string;
-				if (
-					!window.location.pathname.includes("login") &&
-					message.includes("login")
-				) {
-					console.log("redirecting...");
-					window.location.href = "login";
-				} else if (res.status === 200) {
-					setLogged(true);
-				}
+				setLogged(true);
 
 				return { access_token, user };
 			} catch (error) {
-				setAccessToken(null);
-				setUser(null);
-				throw error;
+				console.log("Refresh falhou:", error);
+
+				const axiosError = error as AxiosError;
+
+				// 🚨 Só redireciona se o refresh deu 401
+				if (axiosError.response?.status === 401) {
+					logoutAndRedirect();
+				}
+
+				return null;
 			} finally {
-				// Limpa a promise após completar
 				refreshPromiseRef.current = null;
 			}
 		})();
 
 		return refreshPromiseRef.current;
-	}, [setAccessToken, setUser]);
+	}, [setAccessToken, setUser, logoutAndRedirect]);
 
 	/* ========= REQUEST INTERCEPTOR ========= */
 	useEffect(() => {
@@ -100,26 +104,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 					_retry?: boolean;
 				};
 
+				const isRefreshRequest =
+					originalRequest?.url?.includes("/api/auth/refresh");
+
+				// 🚨 Se o próprio refresh deu 401 → já tratamos no refreshAccessToken
+				if (isRefreshRequest) {
+					console.log("Erro no refresh:", error);
+					return Promise.resolve(null);
+				}
+
+				// 🔁 Se outra request deu 401 → tenta refresh
 				if (error.response?.status === 401 && !originalRequest._retry) {
 					originalRequest._retry = true;
 
-					try {
-						// Usa a função centralizada que previne múltiplos refresh
-						const { access_token } = await refreshAccessToken();
+					const result = await refreshAccessToken();
 
-						// Atualiza o header da requisição original
-						if (originalRequest.headers) {
-							originalRequest.headers.Authorization = `Bearer ${access_token}`;
-						}
-
+					if (result?.access_token) {
+						originalRequest.headers = originalRequest.headers ?? {};
+						originalRequest.headers.Authorization = `Bearer ${result.access_token}`;
 						return api(originalRequest);
-					} catch (refreshError) {
-						// Se o refresh falhar, faz logout
-						return Promise.reject(refreshError);
 					}
 				}
 
-				return Promise.reject(error);
+				console.log("Erro de request:", error);
+				return Promise.resolve(null);
 			}
 		);
 
@@ -130,38 +138,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	/* ========= AUTO REFRESH AO INICIAR ========= */
 	useEffect(() => {
-		// Previne execução duplicada no Strict Mode
-		if (window.location.href.includes("auth")) {
-			return;
-		}
-		if (hasInitializedRef.current) {
-			return;
-		}
+		if (window.location.href.includes("auth")) return;
+		if (hasInitializedRef.current) return;
 
 		hasInitializedRef.current = true;
 
 		const initAuth = async () => {
-			try {
-				await refreshAccessToken();
-			} catch (error) {
-				console.error("Erro ao inicializar auth:", error);
-			} finally {
-				setLoading(false);
-			}
+			await refreshAccessToken();
+			setLoading(false);
 		};
 
 		initAuth();
-
-		// Cleanup: reseta a flag se o componente desmontar
-		return () => {
-			// Não resetar no Strict Mode para evitar re-inicialização
-			// hasInitializedRef.current = false;
-		};
 	}, [refreshAccessToken]);
 
 	return (
 		<AuthContext.Provider
 			value={{
+				refreshAccessToken,
 				user,
 				loading,
 				setLoading,
@@ -177,7 +170,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
 	const context = useContext(AuthContext);
 	if (!context) {
-		throw new Error("useAuth deve ser usado dentro de AuthProvider");
+		console.log("useAuth usado fora de AuthProvider");
+		return null as any;
 	}
 	return context;
 }

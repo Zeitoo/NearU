@@ -127,6 +127,10 @@ export default function Friends() {
 	};
 
 	useEffect(() => {
+		document.title = "Amigos";
+	}, []);
+
+	useEffect(() => {
 		fetchFriends();
 	}, [friendsCounter]);
 
@@ -135,21 +139,61 @@ export default function Friends() {
 	}, [value]);
 
 	return (
-		<div className="pb-20 friends">
-			<div className="fixed left-1/2 -translate-x-1/2 h-15 bottom-0 flex items-center justify-center w-12 z-50">
+		<div className="pb-20 friends md:pb-0 md:pl-22 lg:bg-gray-100 lg:h-screen">
+			<div className="fixed left-1/2 -translate-x-1/2 h-15 bottom-0 flex items-center justify-center w-12 z-50 md:hidden">
 				<div
 					onClick={() => {
 						setValue("");
 					}}
 					className="h-10 aspect-square cursor-pointer"></div>
 			</div>
-			<header className="flex justify-between border-b-gray-300 border-b p-3 px-4 items-center">
+			<header className="flex bg-white gap-6 border-b-gray-300 border-b p-3 px-4 items-center">
 				<h1 className="text-2xl text-indigo-500 font-semibold">
 					Friends
 				</h1>
+				<div className="relative flex-1">
+					<input
+						type="text"
+						name="friends"
+						id="friends"
+						autoComplete="off"
+						value={value}
+						onChange={(e) => {
+							setValue(e.target.value);
+						}}
+						placeholder="Procure por um amigo"
+						aria-label="Search for a friend by name"
+						className={`transition-colors font-semibold  
+					 text-gray-700 w-full p-2 py-5 h-5 text-sm pl-4 rounded-lg bg-gray-100 flex-1 border-2 border-white`}
+					/>
+
+					<div className="absolute cursor-pointer flex items-center text-gray-700 top-1/2 right-2.5 -translate-y-1/2">
+						{value.length > 0 ? (
+							<button
+								onClick={() => setValue("")}
+								className="scale-100 hover:scale-75 transition-all">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.8}
+									stroke="currentColor"
+									className="size-6">
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M6 18 18 6M6 6l12 12"
+									/>
+								</svg>
+							</button>
+						) : (
+							""
+						)}
+					</div>
+				</div>
 			</header>
 
-			<div className="my-5 w-full px-4 z-10">
+			<div className="my-5 w-full px-4 z-10 lg:hidden">
 				<div className="relative">
 					<input
 						type="text"
@@ -166,7 +210,7 @@ export default function Friends() {
 					border-gray-400 text-gray-700 w-full p-2 py-5 h-5 text-[12px] pl-4 rounded-lg`}
 					/>
 
-					<div className="absolute flex items-center text-gray-700 top-1/2 right-2.5 -translate-y-1/2">
+					<div className="absolute cursor-pointer flex items-center text-gray-700 top-1/2 right-2.5 -translate-y-1/2">
 						{value.length > 0 ? (
 							<button
 								onClick={() => setValue("")}
@@ -193,8 +237,9 @@ export default function Friends() {
 			</div>
 
 			{value.length > 0 ? (
-				<div className="appear-2">
+				<div className="appear-2 lg:grid grid-cols-2 gap-2">
 					{foundUsers.map((element, index) => {
+						let caso = "none";
 						const props = [];
 						const isBlocked = Friends.result.blocked.some(
 							(friend) => friend.other_user_id == element.id
@@ -217,6 +262,7 @@ export default function Friends() {
 								option: "Desbloquear",
 								action: unblockFriend,
 							});
+							caso = "bloqueado";
 						} else if (isFriend) {
 							props.push({
 								option: "Bloquear",
@@ -226,6 +272,7 @@ export default function Friends() {
 								option: "Remover",
 								action: removeFriend,
 							});
+							caso = "amigo";
 						} else if (isSent) {
 							props.push({
 								option: "Cancelar",
@@ -236,6 +283,7 @@ export default function Friends() {
 								option: "Bloquear",
 								action: blockFriendF,
 							});
+							caso = "enviado";
 						} else if (isRecieved) {
 							props.push({
 								option: "Remover",
@@ -251,6 +299,8 @@ export default function Friends() {
 								option: "Aceitar",
 								action: acceptRequest,
 							});
+
+							caso = "pedido";
 						} else if (isBlocking) {
 							("");
 						} else {
@@ -267,6 +317,7 @@ export default function Friends() {
 
 						return (
 							<SearchCard
+								caso={caso}
 								key={`${element.user_name} + ${index}`}
 								type="Amigos"
 								friendType={element}
@@ -276,75 +327,79 @@ export default function Friends() {
 					})}
 				</div>
 			) : (
-				<div className="appear">
+				<div className="appear md:mt-6 lg:grid lg:grid-cols-2 gap-10">
 					<>
-						<FriendsCard
-							key={"amigos1"}
-							type="Amigos"
-							friendType={Friends.result.friends}
-							dropDownProps={[
-								{
-									option: "Remover",
-									action: removeFriend,
-								},
-								{
-									option: "Bloquear",
-									action: blockFriend,
-								},
-							]}
-						/>
+						<div>
+							<FriendsCard
+								key={"amigos1"}
+								type="Amigos"
+								friendType={Friends.result.friends}
+								dropDownProps={[
+									{
+										option: "Remover",
+										action: removeFriend,
+									},
+									{
+										option: "Bloquear",
+										action: blockFriend,
+									},
+								]}
+							/>
 
-						<FriendsCard
-							key={"pedidos1"}
-							type="Pedidos recebidos"
-							friendType={Friends.result.received}
-							dropDownProps={[
-								{
-									option: "Remover",
-									action: removeFriend,
-								},
-								{
-									option: "Bloquear",
-									action: blockFriend,
-								},
-								{
-									option: "Aceitar",
-									action: acceptRequest,
-								},
-							]}
-						/>
+							<FriendsCard
+								key={"pedidos1"}
+								type="Pedidos recebidos"
+								friendType={Friends.result.received}
+								dropDownProps={[
+									{
+										option: "Remover",
+										action: removeFriend,
+									},
+									{
+										option: "Bloquear",
+										action: blockFriend,
+									},
+									{
+										option: "Aceitar",
+										action: acceptRequest,
+									},
+								]}
+							/>
+						</div>
 
-						<FriendsCard
-							key={"pedidos2"}
-							type="Pedidos enviados"
-							friendType={Friends.result.sent}
-							dropDownProps={[
-								{
-									option: "Cancelar",
-									action: removeFriend,
-								},
-								{
-									option: "Bloquear",
-									action: blockFriend,
-								},
-							]}
-						/>
+						<div>
+							<FriendsCard
+								key={"pedidos2"}
+								type="Pedidos enviados"
+								friendType={Friends.result.sent}
+								dropDownProps={[
+									{
+										option: "Cancelar",
+										action: removeFriend,
+									},
+									{
+										option: "Bloquear",
+										action: blockFriend,
+									},
+								]}
+							/>
 
-						<FriendsCard
-							key={"blockedusers2"}
-							type="Usuarios bloqueados"
-							friendType={Friends.result.blocked}
-							dropDownProps={[
-								{
-									option: "Desbloquear",
-									action: unblockFriend,
-								},
-								{
-									option: "Remover",
-									action: unblockFriend,
-								},
-							]}
-						/>
+							<FriendsCard
+								key={"blockedusers2"}
+								type="Usuarios bloqueados"
+								friendType={Friends.result.blocked}
+								dropDownProps={[
+									{
+										option: "Desbloquear",
+										action: unblockFriend,
+									},
+									{
+										option: "Remover",
+										action: unblockFriend,
+									},
+								]}
+							/>
+						</div>
 					</>
 				</div>
 			)}
