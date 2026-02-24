@@ -142,12 +142,6 @@ setInterval(() => {
 const handleMessage = (data: webSocketMessage) => {
 	switch (data.type) {
 		case "LOCATION-UPDATE":
-			console.log(
-				"targets:  ",
-				"de ",
-				data.payload.user.user_name,
-				permissions.get(data.payload.user.user_id)
-			);
 			permissions.get(data.payload.user.user_id)?.forEach((element) => {
 				if (onlineUsers.isOnline(element)) {
 					onlineUsers.getSocket(element)?.send(JSON.stringify(data));

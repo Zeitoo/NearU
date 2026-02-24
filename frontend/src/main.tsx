@@ -100,9 +100,11 @@ const router = createBrowserRouter(
 );
 
 createRoot(document.getElementById("root")!).render(
-	<UserProvider>
-		<AuthProvider>
-			<RouterProvider router={router} />
-		</AuthProvider>
-	</UserProvider>
+	<StrictMode>
+		<UserProvider>
+			<AuthProvider>
+				<RouterProvider router={router} />
+			</AuthProvider>
+		</UserProvider>
+	</StrictMode>
 );
