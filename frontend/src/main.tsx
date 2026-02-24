@@ -22,6 +22,7 @@ import PasswordReset from "./Components/PasswordReset.tsx";
 import PasswordChange from "./Components/PasswordChange.tsx";
 import NotFound from "./Components/NotFound.tsx";
 import DeleteAccount from "./Components/DeleteAccount.tsx";
+import AuthCallback from "./Components/AuthCallback.tsx";
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route
@@ -83,6 +84,11 @@ const router = createBrowserRouter(
 			<Route
 				path="deleteaccount"
 				element={<DeleteAccount />}
+			/>
+
+			<Route
+				path="auth/callback"
+				element={<AuthCallback />}
 			/>
 
 			<Route

@@ -6,6 +6,7 @@ import { ResultSetHeader, FieldPacket } from "mysql2";
 import { pool } from "../configs/db.config";
 export interface User {
 	id?: number;
+	user_id?: number;
 	user_name?: string;
 	email_address?: string;
 	password_hash?: string;
@@ -37,6 +38,48 @@ export const putUser = async (
 		}
 
 		return { message: "error" };
+	}
+};
+
+// src/models/auth.model.ts (adicionar esta função)
+
+export const putUserByGoogle = async (profile: {
+	googleId: string;
+	email: string;
+	displayName: string;
+	photo?: string;
+}): Promise<User> => {
+	console.log("Colocando google user...")
+	// 1. Verificar se já existe conta com este email
+	const existing = await getUsersByEmail(profile.email).catch(() => null);
+
+	if (existing?.id) {
+		// Já existe — devolve o utilizador (login automático)
+		return existing;
+	}
+
+	// 2. Criar utilizador novo via Google
+	// user_name pode colidir, então adiciona sufixo aleatório se necessário
+	const baseName = profile.displayName.replace(/\s+/g, "_").slice(0, 40);
+	const user_name = `${baseName}_${crypto.randomBytes(3).toString("hex")}`;
+
+	try {
+		const [result] = await pool.execute<ResultSetHeader>(
+			`INSERT INTO users (user_name, phone_number, email_address, password_hash, profile_img)
+       VALUES (?, NULL, ?, NULL, ?)`,
+			[user_name, profile.email, profile.photo ?? null]
+		);
+
+		return {
+			id: result.insertId,
+			user_name,
+			email_address: profile.email,
+			profile_img: profile.photo ?? null,
+		};
+	} catch (error: any) {
+		throw new Error(
+			"Erro ao criar utilizador via Google: " + error.message
+		);
 	}
 };
 

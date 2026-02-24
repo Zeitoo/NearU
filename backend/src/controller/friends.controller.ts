@@ -24,7 +24,7 @@ interface permissionsSql {
 export default class FriendsController {
 	// Listar amigos
 	static async listFriends(req: AuthRequest, res: Response) {
-		const user_id = req.user?.id;
+		const user_id = req.currentUser?.id;
 		if (!user_id)
 			return res.status(400).json({ message: "Erro na autenticacao..." });
 
@@ -44,7 +44,7 @@ export default class FriendsController {
 			(element) =>
 				!(
 					element.status === "blocked" &&
-					element.requester_id != req.user?.id
+					element.requester_id != req.currentUser?.id
 				)
 		);
 		const permissions = (await getPermissions(user_id)) as permissionsSql[];
@@ -75,19 +75,19 @@ export default class FriendsController {
 			return res
 				.status(400)
 				.json({ message: "ID do usuário é obrigatório." });
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(400).json({
 				message:
 					"Erro desconhecido ao tentar criar pedido de amizade...",
 			});
 
-		const response = await putFriendship(req.user.id, friendId);
+		const response = await putFriendship(req.currentUser.id, friendId);
 		if (!response.success)
 			return res.status(400).json({ message: "Amizade já existente..." });
 
 		// Notifica o amigo online
 		notifyUser(friendId, "FRIEND_REQUEST", {
-			fromUserId: req.user.id,
+			fromUserId: req.currentUser.id,
 			message: "Você recebeu um pedido de amizade",
 		});
 
@@ -101,12 +101,12 @@ export default class FriendsController {
 			return res
 				.status(400)
 				.json({ message: "ID do usuário é obrigatório." });
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(400).json({
 				message: "Erro desconhecido ao aceitar pedido de amizade...",
 			});
 
-		const response = await acceptFriendship(friendId, req.user.id);
+		const response = await acceptFriendship(friendId, req.currentUser.id);
 		if (!response)
 			return res
 				.status(400)
@@ -114,7 +114,7 @@ export default class FriendsController {
 
 		// Notifica o amigo que o pedido foi aceito
 		notifyUser(friendId, "FRIEND_ACCEPTED", {
-			fromUserId: req.user.id,
+			fromUserId: req.currentUser.id,
 			message: "Seu pedido de amizade foi aceito",
 		});
 
@@ -128,12 +128,12 @@ export default class FriendsController {
 			return res
 				.status(400)
 				.json({ message: "ID do usuário é obrigatório." });
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(400).json({
 				message: "Erro desconhecido ao bloquear usuario...",
 			});
 
-		const response = await blockFriendship(req.user.id, friendId);
+		const response = await blockFriendship(req.currentUser.id, friendId);
 		if (!response)
 			return res
 				.status(400)
@@ -141,7 +141,7 @@ export default class FriendsController {
 
 		// Notifica o amigo que foi bloqueado
 		notifyUser(friendId, "FRIEND_BLOCKED", {
-			fromUserId: req.user.id,
+			fromUserId: req.currentUser.id,
 			message: "Você foi bloqueado",
 		});
 
@@ -153,10 +153,10 @@ export default class FriendsController {
 		const { friendId } = req.body;
 		if (!friendId)
 			return res.status(400).json({ message: "User ID é obrigatório." });
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(401).json({ message: "Não autenticado." });
 
-		const success = await unblockFriendship(req.user.id, friendId);
+		const success = await unblockFriendship(req.currentUser.id, friendId);
 		if (!success)
 			return res.status(403).json({
 				message: "Não autorizado ou bloqueio inexistente.",
@@ -164,7 +164,7 @@ export default class FriendsController {
 
 		// Notifica o amigo que foi desbloqueado
 		notifyUser(friendId, "FRIEND_UNBLOCKED", {
-			fromUserId: req.user.id,
+			fromUserId: req.currentUser.id,
 			message: "Você foi desbloqueado",
 		});
 
@@ -174,12 +174,12 @@ export default class FriendsController {
 	// Rejeitar pedido de amizade
 	static async rejectFriends(req: AuthRequest, res: Response) {
 		const { friendId } = req.body;
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(400).json({
 				message: "Erro desconhecido ao rejeitar pedido de amizade...",
 			});
 
-		const response = await rejectFriendship(friendId, req.user.id);
+		const response = await rejectFriendship(friendId, req.currentUser.id);
 		if (!response)
 			return res
 				.status(400)
@@ -187,7 +187,7 @@ export default class FriendsController {
 
 		// Notifica o amigo que o pedido foi rejeitado
 		notifyUser(friendId, "FRIEND_REJECTED", {
-			fromUserId: req.user.id,
+			fromUserId: req.currentUser.id,
 			message: "Seu pedido de amizade foi rejeitado",
 		});
 
@@ -201,12 +201,12 @@ export default class FriendsController {
 			return res
 				.status(400)
 				.json({ message: "ID do usuário é obrigatório." });
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(400).json({
 				message: "Erro desconhecido ao remover amizade...",
 			});
 
-		const response = await removeFriendship(req.user.id, friendId);
+		const response = await removeFriendship(req.currentUser.id, friendId);
 		if (!response)
 			return res
 				.status(400)
@@ -214,7 +214,7 @@ export default class FriendsController {
 
 		// Notifica o amigo que a amizade foi removida
 		notifyUser(friendId, "FRIEND_REMOVED", {
-			fromUserId: req.user.id,
+			fromUserId: req.currentUser.id,
 			message: "Sua amizade foi removida",
 		});
 

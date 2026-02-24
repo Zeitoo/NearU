@@ -13,7 +13,7 @@ import {
 } from "../models/auth.model";
 import { compareHashPasswords } from "../utils/auth";
 import { generateToken } from "../utils/token";
-import { AuthRequest } from "../types";
+import { AuthRequest, User } from "../types";
 
 export default class auth {
 	static async login(req: Request, res: Response) {
@@ -21,7 +21,7 @@ export default class auth {
 
 		if (!email)
 			return res.status(400).json({ message: "Email nao fornecido." });
-		const user = await getUsersByEmail(email);
+		let user = await getUsersByEmail(email);
 
 		if (!user.password_hash || !user.id || !user.user_name)
 			return res.status(400);
@@ -34,12 +34,16 @@ export default class auth {
 		delete user.password_hash;
 		const refreshToken = generateToken(32);
 
+		user.user_id = user.id
+
 		const resposta = await putRefreshToken(refreshToken, user.id);
 
 		if (!resposta)
 			return res.status(500).json({ message: "Houve um erro no login." });
 
 		res.cookie("refresh_token", refreshToken, {
+			secure: true,
+			sameSite: "none",
 			httpOnly: true,
 			maxAge: session ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 60 * 24,
 		});
@@ -106,6 +110,8 @@ export default class auth {
 				.json({ message: "Houve um erro no refresh." });
 
 		res.cookie("refresh_token", refreshToken, {
+			secure: true,
+			sameSite: "none" ,
 			httpOnly: true,
 			maxAge: 1000 * 60 * 60 * 24 * 7,
 		});
@@ -118,6 +124,41 @@ export default class auth {
 			}),
 			user,
 		});
+	}
+
+	static async googleCallback(req: Request, res: Response) {
+		try {
+			const user = req.user as User;
+			if (!user?.id || !user?.user_name) {
+				return res.redirect(
+					`${process.env.FRONTEND_URL}/login?error=google`
+				);
+			}
+
+			const refreshToken = generateToken(32);
+			await putRefreshToken(refreshToken, user.id);
+
+			res.cookie("refresh_token", refreshToken, {
+				secure: true,
+				sameSite: "none",
+				httpOnly: true,
+				maxAge: 1000 * 60 * 60 * 24 * 7,
+			});
+
+			const access_token = generatAccessToken({
+				id: user.id,
+				user_name: user.user_name,
+			});
+
+			// Redireciona para o frontend com o token na URL
+			return res.redirect(
+				`${process.env.FRONTEND_URL}/auth/callback?token=${access_token}`
+			);
+		} catch {
+			return res.redirect(
+				`${process.env.FRONTEND_URL}/login?error=google`
+			);
+		}
 	}
 
 	static async logout(req: Request, res: Response) {
@@ -141,13 +182,13 @@ export default class auth {
 		if (!actual || !newPass)
 			return res.status(400).json({ message: "Informacoes ausentes." });
 
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(401).json({
 				message:
 					"Primeiro inicie a sessao antes de tricar de palavra-passe.",
 			});
 
-		const response = await getUsersById(req.user?.id);
+		const response = await getUsersById(req.currentUser?.id);
 
 		if (!response.password_hash)
 			return res.status(404).json({ message: "user nao encontrado." });
@@ -158,7 +199,7 @@ export default class auth {
 		);
 
 		if (isValid) {
-			const resposta = await updateUserPass(newPass, req.user.id);
+			const resposta = await updateUserPass(newPass, req.currentUser.id);
 
 			if (!resposta)
 				return res.status(400).json({ message: "Deu errado" });
@@ -173,12 +214,12 @@ export default class auth {
 		if (!password)
 			return res.status(400).json({ message: "Palavra-passe ausente." });
 
-		if (!req.user?.id)
+		if (!req.currentUser?.id)
 			return res.status(401).json({
 				message: "Primeiro inicie a sessao antes de apagar a conta.",
 			});
 
-		const response = await getUsersById(req.user?.id);
+		const response = await getUsersById(req.currentUser?.id);
 
 		if (!response.password_hash)
 			return res.status(404).json({ message: "user nao encontrado." });
@@ -189,7 +230,7 @@ export default class auth {
 		);
 
 		if (isValid) {
-			const resposta = await deleteAccountSql(req.user.id);
+			const resposta = await deleteAccountSql(req.currentUser.id);
 
 			if (!resposta)
 				return res.status(400).json({ message: "Deu errado" });

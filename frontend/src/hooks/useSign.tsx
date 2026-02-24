@@ -19,7 +19,15 @@ interface changePassType {
 
 interface serverResponse {
 	message: string;
-	data: any;
+	access_token: string | null;
+	user: {
+		id: number;
+		user_id: number;
+		user_name: string;
+		phone_number: string;
+		email_address: string;
+		profile_img: number;
+	} | null;
 }
 
 import { api } from "../auth/auth";
@@ -42,7 +50,7 @@ function useSign() {
 
 			return message;
 		} catch (error: any) {
-			return { message: error.message };
+			return { message: "error.message", access_token: null, user: null};
 		}
 	};
 

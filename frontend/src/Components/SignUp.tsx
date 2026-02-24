@@ -9,7 +9,7 @@ import renderButton from "./hidePassword";
 import modalClass from "./modal";
 import { signupSchema } from "../utils/zod";
 import type { SignUpForm } from "../utils/zod";
-
+import GoogleLoginButton from "./GoogleLoginButton";
 export default function SignUp() {
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
@@ -83,14 +83,7 @@ export default function SignUp() {
 				</div>
 
 				<div className="w-full mb-3">
-					<button className="flex justify-center cursor-pointer text-sm w-full rounded-md font-medium items-center border-2 border-gray-200 p-2 gap-2">
-						<img
-							className="w-5"
-							src="/google_icon.svg"
-							alt="Google icon"
-						/>
-						<p>Entrar com o Google</p>
-					</button>
+					<GoogleLoginButton />
 				</div>
 
 				<div className="w-full flex gap-1 text-gray-400 font-semibold justify-center items-center">
@@ -214,7 +207,6 @@ export default function SignUp() {
 							</button>
 						</div>
 					</form>
-
 				</div>
 			</div>
 		</div>

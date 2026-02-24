@@ -3,20 +3,23 @@ import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSign from "../hooks/useSign";
-
+import { useUser } from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import renderButton from "./hidePassword";
 import { formsChema } from "../utils/zod";
 import type { SignInForm } from "../utils/zod";
+import { useAuth } from "../Contexts/AuthContext";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 export default function SignIn() {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);
 
+	const { setUser } = useUser();
 	const navigate = useNavigate();
 	const { signIn } = useSign();
-
+	const { accessTokenRef } = useAuth();
 	const form = useForm({
 		resolver: zodResolver(formsChema),
 	});
@@ -30,9 +33,13 @@ export default function SignIn() {
 		setLoading(true);
 		signIn(data).then((response) => {
 			setLoading(false);
-			console.log("Resposta do sigin:  ", "  /  . ",response.message);
+			console.log("Resposta do sigin:  ", "  /  . ", response);
 			if (response.message.includes("sucesso")) {
-				navigate("/map");
+				setUser(response.user);
+				accessTokenRef.current = response.access_token;
+				setTimeout(() => {
+					navigate("/map");
+				}, 2000);
 			} else if (response.message === "Invalid credentials") {
 				setError("email", {
 					message: "Email ou palavra-passe inválidos",
@@ -72,14 +79,7 @@ export default function SignIn() {
 					</p>
 				</div>
 				<div className="w-full sign mb-3">
-					<button className="flex justify-center cursor-pointer text-sm w-full rounded-md font-medium items-center border-2  border-gray-200 p-2 gap-2">
-						<img
-							className="w-5"
-							src="/google_icon.svg"
-							alt="Google icon"
-						/>
-						<p>Entrar com o Google</p>
-					</button>
+					<GoogleLoginButton />
 				</div>
 				<div className="w-full flex gap-1 text-gray-400 font-semibold justify-center items-center">
 					<hr className="w-full h-1" />

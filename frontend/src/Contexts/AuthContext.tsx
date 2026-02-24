@@ -17,6 +17,8 @@ interface AuthContextType {
 	loading: boolean;
 	logged: boolean;
 	accessTokenRef: React.RefObject<string | null>;
+	setLogged: React.Dispatch<React.SetStateAction<boolean>>;
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -129,6 +131,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	/* ========= AUTO REFRESH AO INICIAR ========= */
 	useEffect(() => {
 		// Previne execução duplicada no Strict Mode
+		if (window.location.href.includes("auth")) {
+			return;
+		}
 		if (hasInitializedRef.current) {
 			return;
 		}
@@ -159,8 +164,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			value={{
 				user,
 				loading,
+				setLoading,
 				logged,
 				accessTokenRef,
+				setLogged,
 			}}>
 			{children}
 		</AuthContext.Provider>

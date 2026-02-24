@@ -10,7 +10,7 @@ export const updateLocationPermission = async (
 	res: Response
 ) => {
 	try {
-		const ownerId = req.user?.id;
+		const ownerId = req.currentUser?.id;
 		const { viewerId, isAllowed } = req.body;
 
 		if (!ownerId) {

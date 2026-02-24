@@ -21,4 +21,6 @@ export default function startServer() {
 	server.on("error", (error: NodeJS.ErrnoException) => {
 		console.error("Erro no servidor:", error);
 	});
+
+	console.log(process.env.FRONTEND_URL)
 }

@@ -70,7 +70,7 @@ export default class authMiddleware {
 					.json({ message: "Token inválido ou payload incompleto." });
 			}
 
-			req.user = data;
+			req.currentUser = data;
 
 			return next();
 		} catch (err) {

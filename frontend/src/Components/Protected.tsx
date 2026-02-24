@@ -15,6 +15,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 	}
 
 	if (!user) {
+		console.log("Protected redirecionando...");
 		return (
 			<Navigate
 				to="/login"
