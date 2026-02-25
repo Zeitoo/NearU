@@ -30,8 +30,8 @@ export default function FriendsCard({
 						<div
 							className={`min-h-2 ${
 								friend.online
-									? "bg-green-200 hover:bg-green-300 lg:bg-white"
-									: "bg-blue-50 hover:bg-blue-100 lg:bg-white lg:hover:bg-blue-50"
+									? "bg-green-200 hover:bg-green-300 md:bg-white"
+									: "bg-blue-50 hover:bg-blue-100 md:bg-white md:hover:bg-blue-100"
 							}  gap-1 transition-all my-3 flex items-center p-3 py-6 rounded-lg cursor-pointer`}
 							key={index}>
 							<div className="flex active-avatar overflow-hidden rounded-full items-center">

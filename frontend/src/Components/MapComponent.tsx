@@ -13,13 +13,11 @@ L.Icon.Default.mergeOptions({
 	shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/* ================================ Props ================================ */
 interface MapComponentProps {
 	locations: locations[] | null;
 	myLocation: LocationState | null;
 }
 
-/* ================================ Layers ================================ */
 type LayerKey = "default" | "satellite" | "streets";
 
 const LAYERS: Record<
@@ -45,7 +43,6 @@ const LAYERS: Record<
 	},
 };
 
-/* ================================ Icon Cache ================================ */
 const iconCache = new Map<string, L.Icon>();
 
 const getAvatarIcon = (profileImg: number, isOnline: boolean): L.Icon => {
@@ -67,7 +64,6 @@ const getAvatarIcon = (profileImg: number, isOnline: boolean): L.Icon => {
 	return iconCache.get(key)!;
 };
 
-/* ================================ My Location Icon ================================ */
 const myIcon = new L.DivIcon({
 	html: `<div style="
     width:20px;height:20px;
@@ -85,10 +81,8 @@ const myIcon = new L.DivIcon({
 	iconAnchor: [10, 10],
 });
 
-/* ================================ Types ================================ */
 type LocationWithFriend = locations & { location: LocationState };
 
-/* ================================ MapController ================================ */
 interface MapControllerProps {
 	myLocation: LocationState | null;
 	locations: LocationWithFriend[];
@@ -97,37 +91,56 @@ interface MapControllerProps {
 const MapController: FC<MapControllerProps> = ({ myLocation, locations }) => {
 	const map = useMap();
 	const hasFlownToUser = useRef(false);
+	// Guarda os usernames que já receberam foco
+	const focusedUsers = useRef(new Set<string>());
+	// Guarda os usernames presentes no render anterior
+	const prevUsernames = useRef(new Set<string>());
 
+	// --- Minha localização: foco apenas na primeira vez ---
 	useEffect(() => {
+		if (myLocation === null) {
+			hasFlownToUser.current = false; 
+		}
 		if (myLocation && !hasFlownToUser.current) {
 			map.flyTo([myLocation.latitude, myLocation.longitude], 15, {
 				duration: 1.5,
 			});
 			hasFlownToUser.current = true;
-		} else if (myLocation) {
-			map.panTo([myLocation.latitude, myLocation.longitude], {
-				animate: true,
-				duration: 0.5,
-			});
 		}
 	}, [myLocation, map]);
 
 	useEffect(() => {
-		if (!myLocation && locations.length > 0) {
-			const bounds = L.latLngBounds(
-				locations.map((f) => [
-					f.location.latitude,
-					f.location.longitude,
-				])
-			);
-			map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15 });
+		const currentUsernames = new Set(locations.map((f) => f.user.user_name));
+
+		// Detecta usernames que saíram do mapa → remove do set de focados
+		// para que, se voltarem, recebam foco novamente
+		for (const username of prevUsernames.current) {
+			if (!currentUsernames.has(username)) {
+				focusedUsers.current.delete(username);
+			}
 		}
-	}, [locations, myLocation, map]);
+
+		// Detecta novos pontos (entraram agora) → aplica foco uma única vez
+		for (const friend of locations) {
+			const username = friend.user.user_name;
+			if (!focusedUsers.current.has(username)) {
+				focusedUsers.current.add(username);
+				map.flyTo(
+					[friend.location.latitude, friend.location.longitude],
+					15,
+					{ duration: 1.5 }
+				);
+
+				break;
+			}
+		}
+
+		prevUsernames.current = currentUsernames;
+	}, [locations, map]);
 
 	return null;
 };
 
-/* ================================ Layer Selector ================================ */
 interface LayerSelectorProps {
 	active: LayerKey;
 	onChange: (layer: LayerKey) => void;
@@ -173,7 +186,6 @@ const LayerSelector: FC<LayerSelectorProps> = ({ active, onChange }) => {
 	);
 };
 
-/* ================================ Component ================================ */
 const DEFAULT_CENTER: [number, number] = [-25.9655, 32.5832];
 
 const MapComponent: FC<MapComponentProps> = ({ locations, myLocation }) => {

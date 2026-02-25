@@ -77,7 +77,6 @@ footer li:has(.active) {
 	height: 94dvh;
 }
 
-
 @media screen and (max-width: 768px) {
 	.friends-selector > div {
 		opacity: 0;
@@ -110,8 +109,6 @@ footer li:has(.active) {
 	animation: pulse 2s infinite;
 }
 
-
-
 @keyframes pulse {
 	0% {
 		box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
@@ -126,7 +123,12 @@ footer li:has(.active) {
 	}
 }
 
-body {
-	color: #0b8ee6;
+.friends-card {
+	width: clamp(30px, 100%, 760px);
+}
 
+@media screen and (min-width: 768px) {
+	.clamping {
+		width: clamp(30px, 100%, 900px);
+	}
 }

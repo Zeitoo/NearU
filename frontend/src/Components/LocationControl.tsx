@@ -1,5 +1,6 @@
 import { api } from "../auth/auth";
-import type { friendsReq } from "../types";
+import type { friendsReq, LocationState, locations } from "../types";
+import { calculateDistance } from "../utils/general";
 
 const parentClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
 	e.stopPropagation();
@@ -12,10 +13,14 @@ export default function LocationControl({
 	stopTracking,
 	startTracking,
 	Friends,
+	myLocation,
+	locations,
 }: {
 	stopTracking: () => void;
 	startTracking: () => void;
 	Friends: friendsReq;
+	myLocation: LocationState | null;
+	locations: locations[] | null;
 }) {
 	const locationHandler = (
 		e: React.MouseEvent<HTMLInputElement, MouseEvent>,
@@ -34,14 +39,13 @@ export default function LocationControl({
 				viewerId,
 				isAllowed: target.checked,
 			});
-
 		} catch (error) {
 			console.log("Houve um erro configurando as localizacoes");
 		}
 	};
 
 	return (
-		<div className="location-control scroll-none md:w-85 overflow-scroll">
+		<div className="location-control scroll-none md:w-80 overflow-scroll">
 			<div>
 				<div
 					onClick={parentClickHandler}
@@ -97,6 +101,35 @@ export default function LocationControl({
 			</h1>
 
 			{Friends.result.friends.map((element, index) => {
+				const location = locations?.filter(
+					(elemento) => element.other_user_id == elemento.user.user_id
+				);
+				let distance = null;
+
+				if (Array.isArray(location) && !!myLocation) {
+					if (location.length > 0) {
+						const friendsLatiude = location[0].location?.latitude;
+						const friendsLongitude =
+							location[0].location?.longitude;
+
+						if (
+							typeof friendsLatiude === "number" &&
+							typeof friendsLongitude === "number"
+						) {
+							distance = calculateDistance(
+								{
+									latitude: myLocation.latitude,
+									longitude: myLocation.longitude,
+								},
+								{
+									latitude: friendsLatiude,
+									longitude: friendsLongitude,
+								}
+							).toFixed(2);
+						}
+					}
+				}
+
 				return (
 					<div key={`${element.other_user_id} l${index}`}>
 						<div
@@ -114,9 +147,13 @@ export default function LocationControl({
 								<p className="font-semibold">
 									{element.user_name}
 								</p>
-								<p className="text-gray-600">
-									A 1 Km de distancia
-								</p>
+								{distance ? (
+									<p className="text-gray-600">
+										A {distance} Km de distancia
+									</p>
+								) : (
+									""
+								)}
 							</div>
 
 							<label className="flex items-center cursor-pointer">

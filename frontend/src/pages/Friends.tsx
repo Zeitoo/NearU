@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../auth/auth";
-import FriendsCard from "./FriendsCard";
-import SearchCard from "./SearchCard";
+import FriendsCard from "../Components/FriendsCard";
+import SearchCard from "../Components/SearchCard";
 import type {
 	friendsReq,
 	friendsResponseSql,
@@ -73,7 +73,7 @@ export default function Friends() {
 				});
 			}
 		} catch (error: any) {
-			console.error(
+			console.log(
 				"Erro ao enviar pedido:",
 				error?.response?.data || error.message
 			);
@@ -119,7 +119,7 @@ export default function Friends() {
 				});
 			}
 		} catch (error: any) {
-			console.error(
+			console.log(
 				"Erro ao bloquear:",
 				error?.response?.data || error.message
 			);
@@ -139,7 +139,7 @@ export default function Friends() {
 	}, [value]);
 
 	return (
-		<div className="pb-20 friends md:pb-0 md:pl-22 lg:bg-gray-100 lg:h-screen">
+		<div className="pb-20 friends md:pb-0 md:border border-gray-400 md:ml-22 md:bg-gray-100 lg:h-screen">
 			<div className="fixed left-1/2 -translate-x-1/2 h-15 bottom-0 flex items-center justify-center w-12 z-50 md:hidden">
 				<div
 					onClick={() => {
@@ -151,7 +151,7 @@ export default function Friends() {
 				<h1 className="text-2xl text-indigo-500 font-semibold">
 					Friends
 				</h1>
-				<div className="relative flex-1">
+				<div className="relative hidden lg:block flex-1">
 					<input
 						type="text"
 						name="friends"
@@ -194,7 +194,7 @@ export default function Friends() {
 			</header>
 
 			<div className="my-5 w-full px-4 z-10 lg:hidden">
-				<div className="relative">
+				<div className="relative w-full flex flex-col justify-center items-center">
 					<input
 						type="text"
 						name="friends"
@@ -206,7 +206,7 @@ export default function Friends() {
 						}}
 						placeholder="Procure por um amigo"
 						aria-label="Search for a friend by name"
-						className={`border-2 transition-colors font-semibold bg-white 
+						className={`border-2 friends-card  transition-colors font-semibold bg-white 
 					border-gray-400 text-gray-700 w-full p-2 py-5 h-5 text-[12px] pl-4 rounded-lg`}
 					/>
 
@@ -237,7 +237,7 @@ export default function Friends() {
 			</div>
 
 			{value.length > 0 ? (
-				<div className="appear-2 lg:grid grid-cols-2 gap-2">
+				<div className="appear-2 .friends-card  lg:grid grid-cols-2 gap-2">
 					{foundUsers.map((element, index) => {
 						let caso = "none";
 						const props = [];
@@ -327,9 +327,9 @@ export default function Friends() {
 					})}
 				</div>
 			) : (
-				<div className="appear md:mt-6 lg:grid lg:grid-cols-2 gap-10">
+				<div className="appear md:flex flex-col justify-center items-center md:mt-6 lg:grid lg:grid-cols-2 gap-10">
 					<>
-						<div>
+						<div className="friends-card">
 							<FriendsCard
 								key={"amigos1"}
 								type="Amigos"
@@ -367,7 +367,7 @@ export default function Friends() {
 							/>
 						</div>
 
-						<div>
+						<div className="friends-card ">
 							<FriendsCard
 								key={"pedidos2"}
 								type="Pedidos enviados"

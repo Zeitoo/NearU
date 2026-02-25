@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import AvatarSelector from "./AvatarSelector";
+import AvatarSelector from "../Components/AvatarSelector";
 import { useUser } from "../hooks/useUser";
 export default function Settings() {
 	const [editMode, setEditMode] = useState<boolean>(false);
@@ -22,24 +22,24 @@ export default function Settings() {
 	});
 
 	return (
-		<div className="settings select-none flex flex-col text-sm pb-20 md:pb-5 bg-gray-100">
+		<div className="settings select-none border border-gray-500 flex flex-col text-sm md:ml-22 pb-20 md:pb-5 bg-gray-100 md:justify-center md:items-center">
 			<header className="flex justify-center p-2.5 border-b border-gray-300 md:hidden">
 				<h1 className="font-medium text-md text-gray-600">
 					configurações
 				</h1>
 			</header>
 
-			<div className="md:pl-25 md:pr-8 md:mt-12 px-8 md:pb-0 pb-10">
-				<div className="hidden md:block ml-12">
+			<div className="md:pl-5 md:flex md:flex-col md:justify-center md:items-center w-full md:pr-8 md:mt-12 px-8 md:pb-0 pb-10">
+				<div className="hidden clamping md:block ml-12">
 					<h2 className="text-xl">Perfil publico</h2>
 					<p>Como voce aparece para outras pessoas</p>
 				</div>
 				<div
-					className={`profile  rounded-xl  ${
+					className={`profile clamping  rounded-xl  ${
 						editMode
 							? ""
 							: "md:bg-white md:justify-start border-gray-100 border"
-					} flex justify-center   mt-5 md:ml-10`}>
+					} flex justify-center  mt-5 md:ml-10`}>
 					<div className="relative ">
 						{editMode ? (
 							<img
@@ -97,11 +97,11 @@ export default function Settings() {
 					</div>
 				</div>
 
-				<div className="h-full flex-1">
+				<div className="h-full w-full flex-1 md:flex md:flex-col md:justify-center md:items-center">
 					{editMode ? (
 						""
 					) : (
-						<div className="block md:hidden">
+						<div className="block  md:hidden">
 							<div className="flex justify-center my-5">
 								<button
 									onClick={() => setEditMode(!editMode)}
@@ -132,7 +132,7 @@ export default function Settings() {
 							avatarsetter={setselectedAvatar}
 						/>
 					) : (
-						<div className="appear md:pl-5 mt-8 md:ml-5">
+						<div className="appear clamping w-full md:pl-5 mt-8 ">
 							<h2 className="text-gray-600 font-semibold md:ml-2">
 								Configurações de privacidade
 							</h2>

@@ -2,14 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PhoneInput } from "./PhoneInput";
+import { PhoneInput } from "../Components/PhoneInput";
 import useSign from "../hooks/useSign";
 import { useNavigate } from "react-router-dom";
-import renderButton from "./hidePassword";
-import modalClass from "./modal";
+import renderButton from "../Components/hidePassword";
+import modalClass from "../Components/modal";
 import { signupSchema } from "../utils/zod";
 import type { SignUpForm } from "../utils/zod";
-import GoogleLoginButton from "./GoogleLoginButton";
+import GoogleLoginButton from "../Components/GoogleLoginButton";
 export default function SignUp() {
 	const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 	const passwordElementRef = useRef<HTMLInputElement>(null);

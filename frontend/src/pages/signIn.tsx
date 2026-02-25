@@ -4,11 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSign from "../hooks/useSign";
 import { useNavigate } from "react-router-dom";
-import renderButton from "./hidePassword";
+import renderButton from "../Components/hidePassword";
 import { formsChema } from "../utils/zod";
 import type { SignInForm } from "../utils/zod";
 import { useAuth } from "../Contexts/AuthContext";
-import GoogleLoginButton from "./GoogleLoginButton";
+import GoogleLoginButton from "../Components/GoogleLoginButton";
 
 export default function SignIn() {
 	const [loading, setLoading] = useState<boolean>(false);
