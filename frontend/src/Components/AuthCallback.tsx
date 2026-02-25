@@ -47,7 +47,7 @@ function AuthCallback() {
 		const accessToken = searchParams.get("token");
 
 		if (!accessToken) {
-			console.error("Token não encontrado na URL");
+			console.log("Token não encontrado na URL");
 			return;
 		}
 		const token = accessToken;

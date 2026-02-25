@@ -102,7 +102,7 @@ export default class user {
 					details: err.message,
 				});
 			}
-			console.error("Erro ao verificar JWT:", err);
+			console.log("Erro ao verificar JWT:", err);
 			return res
 				.status(500)
 				.json({ message: "Erro interno ao verificar token." });

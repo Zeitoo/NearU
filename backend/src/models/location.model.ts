@@ -54,7 +54,7 @@ export const loadPermissionsToCache = async (): Promise<
 
 		return permissions;
 	} catch (err) {
-		console.error("Erro ao carregar permissions:", err);
+		console.log("Erro ao carregar permissions:", err);
 		throw err;
 	}
 };
@@ -73,10 +73,10 @@ export const removePermissionFromCache = (
 	s.delete(viewerId);
 	if (s.size === 0) permissions.delete(ownerId);
 };
- 
-export const getPermissions = async (ownerId: number):Promise<unknown> => {
+
+export const getPermissions = async (ownerId: number): Promise<unknown> => {
 	try {
-		const [rows]= await pool.query<RowDataPacket[]>(
+		const [rows] = await pool.query<RowDataPacket[]>(
 			`
 			SELECT * 
 			FROM location_permissions 

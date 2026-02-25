@@ -82,7 +82,7 @@ export async function handleWebSocketConnection(
 
 			handleMessage(data);
 		} catch (error) {
-			console.error("Erro ao processar mensagem:", error);
+			console.log("Erro ao processar mensagem:", error);
 		}
 	});
 
@@ -94,7 +94,7 @@ export async function handleWebSocketConnection(
 	});
 
 	ws.on("error", (error) => {
-		console.error(`Erro no WebSocket do usuário ${userId}:`, error);
+		console.log(`Erro no WebSocket do usuário ${userId}:`, error);
 
 		if (ws.userId) {
 			onlineUsers.removeByUser(ws.userId);

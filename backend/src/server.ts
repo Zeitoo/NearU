@@ -1,7 +1,7 @@
 import http from "http";
 import createApp from "./app";
 import { setupWebSocket } from "./websocket/server";
-import {query} from "./utils/auth"
+import { query } from "./utils/auth";
 export default function startServer() {
 	const app = createApp();
 
@@ -13,14 +13,19 @@ export default function startServer() {
 	});
 
 	server.on("error", (error: NodeJS.ErrnoException) => {
-		console.error("Erro no servidor:", error);
+		console.log("Erro no servidor:", error);
 	});
 
 	setTimeout(() => {
-		query("SHOW TABLES").then((res) => {
-			console.log("Conexão com o banco de dados estabelecida com sucesso.", res);
-		}).catch((err) => {
-			console.log(err)
-		})
+		query("SHOW TABLES")
+			.then((res) => {
+				console.log(
+					"Conexão com o banco de dados estabelecida com sucesso.",
+					res
+				);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	}, 5000);
 }

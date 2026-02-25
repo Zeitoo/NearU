@@ -49,7 +49,6 @@ export const putUserByGoogle = async (profile: {
 	displayName: string;
 	photo?: string;
 }): Promise<User> => {
-
 	// 1. Verificar se já existe conta com este email
 	const existing = await getUsersByEmail(profile.email).catch(() => null);
 
@@ -91,7 +90,7 @@ export const getUsersByEmail = async (email: string): Promise<User> => {
 		);
 		return rows;
 	} catch (error) {
-		console.error("Error in getUsersByEmail:", error);
+		console.log("Error in getUsersByEmail:", error);
 		return [];
 	}
 };
@@ -104,7 +103,7 @@ export const getUsersById = async (id: number): Promise<User> => {
 		);
 		return rows;
 	} catch (error) {
-		console.error("Error in getUsersByEmail:", error);
+		console.log("Error in getUsersByEmail:", error);
 		return [];
 	}
 };
@@ -119,7 +118,7 @@ export const updateUserPass = async (password: string, userId: number) => {
 
 		return rows.affectedRows > 0;
 	} catch (error) {
-		console.error("Error in setpasswords", error);
+		console.log("Error in setpasswords", error);
 		return null;
 	}
 };
@@ -154,7 +153,7 @@ export const putRefreshToken = async (
 		return true;
 	} catch (error) {
 		await connection.rollback();
-		console.error("Error in putRefreshToken:", error);
+		console.log("Error in putRefreshToken:", error);
 		return false;
 	} finally {
 		connection.release();
@@ -194,7 +193,7 @@ export const getRefreshToken = async (
 		);
 		return rows.length ? rows[0] : null;
 	} catch (error) {
-		console.error("Error in getRefreshToken:", error);
+		console.log("Error in getRefreshToken:", error);
 		return null;
 	}
 };
@@ -226,7 +225,7 @@ export const deleteRefreshToken = async (refreshToken: string) => {
 
 		return false;
 	} catch (error) {
-		console.error("Error in getRefreshToken:", error);
+		console.log("Error in getRefreshToken:", error);
 		return null;
 	}
 };
@@ -246,7 +245,7 @@ export const deleteAccountSql = async (user_id: number) => {
 
 		return false;
 	} catch (error) {
-		console.error("Error in getRefreshToken:", error);
+		console.log("Error in getRefreshToken:", error);
 		return null;
 	}
 };

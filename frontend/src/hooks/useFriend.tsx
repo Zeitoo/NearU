@@ -28,7 +28,7 @@ export default function useFriend(
 				}));
 			}
 		} catch (error: any) {
-			console.error(
+			console.log(
 				"Erro ao remover amigo:",
 				error?.response?.data || error.message
 			);
@@ -75,7 +75,7 @@ export default function useFriend(
 				});
 			}
 		} catch (error: any) {
-			console.error(
+			console.log(
 				"Erro ao bloquear:",
 				error?.response?.data || error.message
 			);
@@ -107,7 +107,7 @@ export default function useFriend(
 				});
 			}
 		} catch (error: any) {
-			console.error(
+			console.log(
 				"Erro ao aceitar:",
 				error?.response?.data || error.message
 			);
@@ -132,7 +132,7 @@ export default function useFriend(
 				}));
 			}
 		} catch (error: any) {
-			console.error(
+			console.log(
 				"Erro ao desbloquear:",
 				error?.response?.data || error.message
 			);

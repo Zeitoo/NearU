@@ -26,7 +26,7 @@ export default function createApp() {
 	app.use(limiter);
 
 	app.use((error: any, _req: any, res: any, _next: any) => {
-		console.error("Erro não tratado:", error);
+		console.log("Erro não tratado:", error);
 		res.status(500).json({
 			message: "Erro interno do servidor",
 			error:

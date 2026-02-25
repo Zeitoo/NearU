@@ -42,7 +42,7 @@ export const updateLocationPermission = async (
 			message: "Permissão atualizada com sucesso",
 		});
 	} catch (error) {
-		console.error(error);
+		console.log(error);
 
 		return res.status(500).json({
 			message: "Erro interno do servidor",

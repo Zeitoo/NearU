@@ -10,7 +10,7 @@ export const getUsersByName = async (name: string): Promise<User[]> => {
 
 		return rows as User[];
 	} catch (error) {
-		console.error("Error in getUsersByName:", error);
+		console.log("Error in getUsersByName:", error);
 		return [];
 	}
 };

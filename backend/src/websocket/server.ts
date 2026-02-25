@@ -1,15 +1,15 @@
-import { Server } from 'http';
-import { WebSocketServer } from 'ws';
-import { handleWebSocketConnection } from './handler';
+import { Server } from "http";
+import { WebSocketServer } from "ws";
+import { handleWebSocketConnection } from "./handler";
 
 export function setupWebSocket(server: Server) {
-  const wss = new WebSocketServer({ server });
+	const wss = new WebSocketServer({ server });
 
-  wss.on('connection', handleWebSocketConnection);
+	wss.on("connection", handleWebSocketConnection);
 
-  wss.on('error', (error) => {
-    console.error('Erro no servidor WebSocket:', error);
-  });
+	wss.on("error", (error) => {
+		console.log("Erro no servidor WebSocket:", error);
+	});
 
-  return wss;
+	return wss;
 }
