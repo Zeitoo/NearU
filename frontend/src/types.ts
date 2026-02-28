@@ -51,6 +51,7 @@ export interface socketMsg {
 }
 
 export interface outletContextType {
+	locLoading: boolean;
 	isSharing: boolean;
 	Friends: friendsReq;
 	setFriends: React.Dispatch<React.SetStateAction<friendsReq>>;
@@ -67,6 +68,6 @@ export type LocationState = {
 };
 
 export interface locations {
-  user: User;
-  location: LocationState | null;
+	user: User;
+	location: LocationState | null;
 }

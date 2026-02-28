@@ -8,11 +8,13 @@ import rateLimit from "express-rate-limit";
 
 // Configuração do rate limiter
 const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutos
+	windowMs: 10 * 60 * 1000, // 15 minutos
 	max: 100, // 100 requisições por IP
 	standardHeaders: true, // informa limites no cabeçalho
 	legacyHeaders: false, // desativa cabeçalhos antigos
-	message: "Você excedeu o número de requisições, tente mais tarde.",
+	handler: (req, res) => {
+		req.socket.destroy();
+	},
 });
 
 export default function createApp() {

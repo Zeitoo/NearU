@@ -15,14 +15,20 @@ export default function LocationControl({
 	Friends,
 	myLocation,
 	locations,
+	isSharing,
+	locLoading,
+	setFriends,
 }: {
 	stopTracking: () => void;
 	startTracking: () => void;
+	setFriends: React.Dispatch<React.SetStateAction<friendsReq>>;
 	Friends: friendsReq;
 	myLocation: LocationState | null;
 	locations: locations[] | null;
+	isSharing: boolean;
+	locLoading: boolean;
 }) {
-	const locationHandler = (
+	const locationHandler = async (
 		e: React.MouseEvent<HTMLInputElement, MouseEvent>,
 		viewerId: number
 	) => {
@@ -35,10 +41,33 @@ export default function LocationControl({
 		>;
 
 		try {
-			api.patch("api/locations", {
+			const response = await api.patch("api/locations", {
 				viewerId,
 				isAllowed: target.checked,
 			});
+
+			if (response.status == 200) {
+				setFriends((prev) => {
+					let tempFriends = prev.result.friends.map((element) => {
+						if (element.other_user_id == viewerId) {
+							element.isAllowed = target.checked;
+							return element;
+						}
+						return element;
+					});
+
+					return {
+						message: prev.message,
+						result: {
+							blocked: prev.result.blocked,
+							blocked_by: prev.result.blocked_by,
+							sent: prev.result.sent,
+							received: prev.result.received,
+							friends: tempFriends,
+						},
+					};
+				});
+			}
 		} catch (error) {
 			console.log("Houve um erro configurando as localizacoes");
 		}
@@ -79,26 +108,49 @@ export default function LocationControl({
 					</div>
 
 					<label className="flex items-center cursor-pointer">
-						<input
-							onClick={(e) => {
-								e.stopPropagation();
-								if (e.currentTarget.checked) {
-									startTracking();
-								} else {
-									stopTracking();
-								}
-							}}
-							type="checkbox"
-							id="ghost-mode"
-							name="ghost-mode"
-							className="switch"
-						/>
+						{locLoading ? (
+							<div>
+								<div className="loader loader-blue"></div>
+							</div>
+						) : (
+							<input
+								onClick={(e) => {
+									e.stopPropagation();
+									if (e.currentTarget.checked) {
+										startTracking();
+									} else {
+										stopTracking();
+									}
+								}}
+								checked={isSharing}
+								type="checkbox"
+								id="ghost-mode"
+								name="ghost-mode"
+								className="switch"
+							/>
+						)}
 					</label>
 				</div>
 			</div>
 			<h1 className="font-medium my-3 text-sm px-2 text-gray-600">
 				Amigos selecionados
 			</h1>
+
+			{isSharing ? (
+				<p className="text-[12px] font-normal px-2 text-gray-600">
+					Partilhando com{" "}
+					<span className="text-black">
+						{
+							Friends.result.friends.filter(
+								(element) => element.isAllowed
+							).length
+						}
+					</span>{" "}
+					Amigos
+				</p>
+			) : (
+				""
+			)}
 
 			{Friends.result.friends.map((element, index) => {
 				const location = locations?.filter(

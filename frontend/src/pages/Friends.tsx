@@ -139,7 +139,7 @@ export default function Friends() {
 	}, [value]);
 
 	return (
-		<div className="pb-20 friends md:pb-0 md:border border-gray-400 md:ml-22 md:bg-gray-100 lg:h-screen">
+		<div className="pb-20 friends md:pb-0 md:border border-gray-400 md:ml-22 md:bg-gray-100 md:h-screen md:overflow-y-auto">
 			<div className="fixed left-1/2 -translate-x-1/2 h-15 bottom-0 flex items-center justify-center w-12 z-50 md:hidden">
 				<div
 					onClick={() => {

@@ -2,9 +2,14 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AvatarSelector from "../Components/AvatarSelector";
 import { useUser } from "../hooks/useUser";
+import { useOutletContext } from "react-router-dom";
+import type { outletContextType } from "../types";
+
 export default function Settings() {
 	const [editMode, setEditMode] = useState<boolean>(false);
 	const { user } = useUser();
+
+	const { stopTracking, isSharing } = useOutletContext<outletContextType>();
 
 	const [selectedAvatar, setselectedAvatar] = useState<number>(
 		user?.profile_img || 1
@@ -22,7 +27,7 @@ export default function Settings() {
 	});
 
 	return (
-		<div className="settings select-none border border-gray-500 flex flex-col text-sm md:ml-22 pb-20 md:pb-5 bg-gray-100 md:justify-center md:items-center">
+		<div className="settings select-none border border-gray-400 flex flex-col text-sm md:ml-22 pb-20 md:pb-5 bg-gray-100 md:justify-center md:items-center">
 			<header className="flex justify-center p-2.5 border-b border-gray-300 md:hidden">
 				<h1 className="font-medium text-md text-gray-600">
 					configurações
@@ -169,8 +174,12 @@ export default function Settings() {
 										<input
 											onClick={(e) => {
 												e.stopPropagation();
+												if (isSharing) {
+													stopTracking();
+												}
 											}}
-											defaultChecked
+											readOnly
+											checked={!isSharing}
 											type="checkbox"
 											id="ghost-mode"
 											name="ghost-mode"

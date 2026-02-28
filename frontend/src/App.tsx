@@ -21,8 +21,9 @@ const intialFriends = {
 function App() {
 	const { logged, accessTokenRef } = useAuth();
 	const [Friends, setFriends] = useState<friendsReq>(intialFriends);
+	const [locLoading, setLocLoading] = useState<boolean>(false);
 
-	const [isSharing, setIsSharing] = useState<boolean>(true);
+	const [isSharing, setIsSharing] = useState<boolean>(false);
 
 	const fetchFriends = async () => {
 		const response = await api.get("api/friends");
@@ -48,6 +49,7 @@ function App() {
 			setError("Geolocalização não suportada.");
 			return;
 		}
+		setLocLoading(true);
 
 		watchId.current = navigator.geolocation.watchPosition(
 			(position) => {
@@ -58,15 +60,17 @@ function App() {
 				});
 
 				setIsSharing(true);
+				setLocLoading(false);
 			},
 			(err) => {
 				setError(err.message);
+				setLocLoading(false);
 			},
 			{
 				enableHighAccuracy: true,
 				maximumAge: 0,
 				timeout: 10000,
-			}	
+			}
 		);
 	};
 
@@ -103,6 +107,7 @@ function App() {
 					<div className="text-black">
 						<Outlet
 							context={{
+								locLoading,
 								isSharing,
 								Friends,
 								setFriends,

@@ -7,8 +7,16 @@ import LocationControl from "../Components/LocationControl";
 export default function Map() {
 	const [friendsExpanded, setFriendsExpanded] = useState(false);
 
-	const { startTracking, locations, myLocation, Friends, stopTracking } =
-		useOutletContext<outletContextType>();
+	const {
+		startTracking,
+		locations,
+		myLocation,
+		setFriends,
+		Friends,
+		stopTracking,
+		isSharing,
+		locLoading
+	} = useOutletContext<outletContextType>();
 
 	const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
@@ -54,6 +62,9 @@ export default function Map() {
 
 					<div className="max-h-full px-3 pb-10 pt-0 md:pt-5 ">
 						<LocationControl
+						setFriends={setFriends}
+						locLoading={locLoading}
+						isSharing={isSharing}
 							myLocation={myLocation}
 							locations={locations}
 							Friends={Friends}

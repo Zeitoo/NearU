@@ -49,7 +49,7 @@ export const WebSocketProvider = ({
 	const { user } = useUser();
 
 	const connect = useCallback(() => {
-		console.log("🔌 Tentando conectar WebSocket...");
+		console.log("Tentando conectar WebSocket...");
 
 		setStatus("CONNECTING");
 
@@ -57,7 +57,7 @@ export const WebSocketProvider = ({
 		socketRef.current = socket;
 
 		socket.onopen = () => {
-			console.log("✅ WebSocket conectado.");
+			console.log("WebSocket conectado.");
 			setStatus("OPEN");
 			reconnectAttempts.current = 0;
 		};
@@ -98,12 +98,12 @@ export const WebSocketProvider = ({
 		};
 
 		socket.onerror = (error) => {
-			console.log("❌ WebSocket erro:", error);
+			console.log(" WebSocket erro:", error);
 			setStatus("ERROR");
 		};
 
 		socket.onclose = () => {
-			console.log("🔒 WebSocket fechado.");
+			console.log("WebSocket fechado.");
 			setStatus("CLOSED");
 
 			if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
